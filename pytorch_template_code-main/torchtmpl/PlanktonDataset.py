@@ -1,0 +1,148 @@
+import numpy as np
+import os
+import torch
+import matplotlib.pyplot as plt
+from torch.utils.data import Dataset
+from PIL import Image
+
+Image.MAX_IMAGE_PIXELS = None
+
+def show_plankton_image(img, mask):
+    """
+    Display an image and its mask side by side
+
+    img is either (H, W, 1)
+    mask is either (H, W)
+    """
+
+    img = img.squeeze()
+
+    plt.subplot(1, 2, 1)
+    plt.imshow(img, cmap="gray")
+    plt.title("Image")
+    plt.axis("off")
+
+    plt.subplot(1, 2, 2)
+    plt.imshow(mask, interpolation="none", cmap="tab20c")
+    plt.title("Mask")
+    plt.axis("off")
+
+    plt.tight_layout()
+    plt.savefig("plankton_sample.png", bbox_inches="tight", dpi=300)
+    plt.show()
+
+def extract_patch_from_ppm(ppm_path, row_idx, col_idx, patch_size):
+    """
+    Extract a patch from a PPM image
+
+    Arguments:
+    - ppm_path: the path to the PPM image
+    - row_idx: the row index of the patch
+    - col_idx: the column index of the patch
+    - patch_size: the size of the patch
+
+    Returns:
+    - patch: the extracted patch
+    """
+    # Read the PPM image and extract the patch
+    with open(ppm_path, "rb") as f:
+        # Skip the PPM magic number
+        f.readline()
+        # Skip the PPM comment
+        while True:
+            line = f.readline().decode("utf-8")
+            if not line.startswith("#"):
+                break
+        ncols, nrows = map(int, line.split())
+        maxval = int(f.readline().decode("utf-8"))
+        
+        # Maxval is either lower than 256 or 65536
+        # It is actually 255 for the scans, and 65536 for the masks
+        # This maximal value impacts the number of bytes used for encoding the pixels' value
+        if maxval == 255:
+            nbytes_per_pixel = 1
+            dtype = np.uint8
+        elif maxval == 65535:
+            nbytes_per_pixel = 2
+            dtype = np.dtype("uint16")
+            # The PPM image is in big endian
+            dtype = dtype.newbyteorder(">")
+        else:
+            raise ValueError(f"Unsupported maxval {maxval}")
+
+        first_pixel_offset = f.tell()
+        f.seek(0, 2)  # Seek to the end of the file
+        data_size = f.tell() - first_pixel_offset
+        # Check that the file size is as expected
+        assert data_size == (ncols * nrows * nbytes_per_pixel)
+
+        f.seek(first_pixel_offset)  # Seek back to the first pixel
+
+        # Read all the rows of the patch from the image
+
+        patch = np.zeros(patch_size, dtype=dtype)
+        for i in range(patch_size[0]):
+            f.seek(
+                first_pixel_offset
+                + ((row_idx + i) * ncols + col_idx) * nbytes_per_pixel,
+                0,  # whence
+            )
+            row_data = f.read(patch_size[1] * nbytes_per_pixel)
+            patch[i] = np.frombuffer(row_data, dtype=dtype)
+
+    return patch
+
+class PlanktonDataset(Dataset):
+    def __init__(self, dir, patch_size, transform = None):
+        self.dir = dir
+        self.patch_size = patch_size
+        self.transform = transform
+        self.scan_files = []
+        self.mask_files = []
+        self.patches = []
+        
+        for file_name in os.listdir(dir):
+            if file_name.endswith("scan.png.ppm"):
+                base_name = file_name.replace("scan.png.ppm", "")
+                mask_name = base_name + "mask.png.ppm"
+
+                scan_path = os.path.join(dir, file_name)
+                mask_path = os.path.join(dir, mask_name)
+
+                if os.path.exists(mask_path):
+                    self.scan_files.append(scan_path)
+                    self.mask_files.append(mask_path)
+        
+        for img_idx, scan_path in enumerate(self.scan_files):
+            with Image.open(scan_path) as img:
+                width, height = img.size
+            num_patches_x = width // patch_size
+            num_patches_y = height // patch_size
+            
+            for i in range(num_patches_y):
+                for j in range(num_patches_x):
+                    self.patches.append((img_idx, i, j))
+    
+    def __len__(self):
+        return len(self.patches)
+    
+    def __getitem__(self, idx):
+        
+        img_idx, patch_i, patch_j = self.patches[idx]
+        
+        row_start = patch_i * self.patch_size
+        col_start = patch_j * self.patch_size
+        img_patch = extract_patch_from_ppm(self.scan_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
+        mask_patch = extract_patch_from_ppm(self.mask_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
+        
+        if self.transform:
+            img_patch = self.transform(img_patch)
+            mask_patch = self.transform(mask_patch)
+
+        return {
+            'scan': img_patch,
+            'mask': mask_patch,
+            'global_idx': idx,
+            'local_idx': (patch_i, patch_j),
+            'image_idx': img_idx
+        }
