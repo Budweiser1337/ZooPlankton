@@ -47,7 +47,7 @@ def train(config):
     # Build the model
     logging.info("= Model")
     model_config = config["model"]
-    model = models.build_model(model_config, input_size[0], num_classes)
+    model = models.build_model(model_config, input_size[0], 1)
     model.to(device)
 
     # Build the loss
