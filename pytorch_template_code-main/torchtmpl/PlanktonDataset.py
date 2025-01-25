@@ -93,9 +93,10 @@ def extract_patch_from_ppm(ppm_path, row_idx, col_idx, patch_size):
     return patch
 
 class PlanktonDataset(Dataset):
-    def __init__(self, dir, patch_size, transform = None):
+    def __init__(self, dir, patch_size, train=True, transform = None):
         self.dir = dir
         self.patch_size = patch_size
+        self.train = train
         self.transform = transform
         self.scan_files = []
         self.mask_files = []
@@ -109,8 +110,9 @@ class PlanktonDataset(Dataset):
                 scan_path = os.path.join(dir, file_name)
                 mask_path = os.path.join(dir, mask_name)
 
-                if os.path.exists(mask_path):
+                if os.path.exists(scan_path):
                     self.scan_files.append(scan_path)
+                if os.path.exists(mask_path):
                     self.mask_files.append(mask_path)
         
         for img_idx, scan_path in enumerate(self.scan_files):
@@ -133,16 +135,18 @@ class PlanktonDataset(Dataset):
         row_start = patch_i * self.patch_size
         col_start = patch_j * self.patch_size
         img_patch = extract_patch_from_ppm(self.scan_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
-        mask_patch = extract_patch_from_ppm(self.mask_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
+        if self.train:
+            mask_patch = extract_patch_from_ppm(self.mask_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
+            mask_patch = mask_patch.astype(np.uint8)
+            
+        if mask_patch.dtype.byteorder not in ('=', '|'):
+            mask_patch = mask_patch.astype(mask_patch.dtype.newbyteorder('='))
         
         if self.transform:
             img_patch = self.transform(img_patch)
             mask_patch = self.transform(mask_patch)
 
-        return {
-            'scan': img_patch,
-            'mask': mask_patch,
-            'global_idx': idx,
-            'local_idx': (patch_i, patch_j),
-            'image_idx': img_idx
-        }
+        if not self.train:
+            return img_patch/255.
+        
+        return img_patch/255., np.where(mask_patch <= 8, 0, 1)

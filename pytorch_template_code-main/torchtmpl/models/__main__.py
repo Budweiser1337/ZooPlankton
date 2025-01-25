@@ -4,7 +4,7 @@
 import torch
 
 # Local imports
-from . import build_model
+from . import build_model, UNet
 
 
 def test_linear():
@@ -30,7 +30,14 @@ def test_cnn():
     output = model(input_tensor)
     print(f"Output tensor of size : {output.shape}")
 
+def test_unet():
+    model = UNet(3, 1)
+    model.to('cuda')
+    input_size = (3, 512, 512)
+    batch_size = 8
+    input_tensor = torch.randn(batch_size, *input_size).to('cuda')
+    output = model(input_tensor)
+    print(output.shape)
 
 if __name__ == "__main__":
-    test_linear()
-    test_cnn()
+    test_unet()

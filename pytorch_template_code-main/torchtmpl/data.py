@@ -11,6 +11,7 @@ import torch.utils.data
 import torchvision
 from torchvision import transforms
 
+import PlanktonDataset
 import matplotlib.pyplot as plt
 
 
@@ -29,12 +30,12 @@ def get_dataloaders(data_config, use_cuda):
     logging.info("  - Dataset creation")
 
     input_transform = transforms.Compose(
-        [transforms.Grayscale(), transforms.Resize((128, 128)), transforms.ToTensor()]
+        [transforms.ToTensor()]
     )
-
-    base_dataset = torchvision.datasets.Caltech101(
-        root=data_config["trainpath"],
-        download=True,
+    base_dataset = PlanktonDataset.PlanktonDataset(
+        dir=data_config["trainpath"],
+        train=True,
+        patch_size=256,
         transform=input_transform,
     )
 
@@ -66,7 +67,7 @@ def get_dataloaders(data_config, use_cuda):
         pin_memory=use_cuda,
     )
 
-    num_classes = len(base_dataset.categories)
+    num_classes = 2
     input_size = tuple(base_dataset[0][0].shape)
 
     return train_loader, valid_loader, input_size, num_classes

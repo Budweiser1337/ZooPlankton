@@ -89,7 +89,7 @@ def train(model, loader, f_loss, optimizer, device, dynamic_display=True):
         # Compute the forward propagation
         outputs = model(inputs)
 
-        loss = f_loss(outputs, targets)
+        loss = f_loss(outputs, targets.squeeze(1).long())
 
         # Backward and optimize
         optimizer.zero_grad()

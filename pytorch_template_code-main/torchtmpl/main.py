@@ -13,15 +13,19 @@ import torch
 import torchinfo.torchinfo as torchinfo
 
 # Local imports
-from . import data
-from . import models
-from . import optim
-from . import utils
+import data
+import models
+import optim
+import utils
 
 
 def train(config):
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda") if use_cuda else torch.device("cpu")
+    if use_cuda:
+        print("using gpu")
+    else:
+        print("using cpu")
 
     if "wandb" in config["logging"]:
         wandb_config = config["logging"]["wandb"]
@@ -43,7 +47,7 @@ def train(config):
     # Build the model
     logging.info("= Model")
     model_config = config["model"]
-    model = models.build_model(model_config, input_size, num_classes)
+    model = models.build_model(model_config, input_size[0], num_classes)
     model.to(device)
 
     # Build the loss
