@@ -49,7 +49,7 @@ def train(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, input_size[0], 1)
-    model.load_state_dict(torch.load("logs/UNet_best/best_model.pt")) 
+    # model.load_state_dict(torch.load("logs/UNet_best/best_model.pt")) 
     model.to(device)
 
     # Build the loss
