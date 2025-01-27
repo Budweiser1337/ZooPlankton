@@ -101,6 +101,7 @@ class PlanktonDataset(Dataset):
         self.scan_files = []
         self.mask_files = []
         self.patches = []
+        self.image_sizes = {} 
         
         for file_name in os.listdir(dir):
             if file_name.endswith("scan.png.ppm"):
@@ -118,6 +119,7 @@ class PlanktonDataset(Dataset):
         for img_idx, scan_path in enumerate(self.scan_files):
             with Image.open(scan_path) as img:
                 width, height = img.size
+            self.image_sizes[img_idx] = (width, height)
             num_patches_x = width // patch_size
             num_patches_y = height // patch_size
             
@@ -139,16 +141,15 @@ class PlanktonDataset(Dataset):
             mask_patch = extract_patch_from_ppm(self.mask_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
             mask_patch = mask_patch.astype(np.uint8)
             mask_patch = np.where(mask_patch <= 8., 0., 1.).astype(np.float32)
-
-
-        if mask_patch.dtype.byteorder not in ('=', '|'):
-            mask_patch = mask_patch.astype(mask_patch.dtype.newbyteorder('='))
+            if mask_patch.dtype.byteorder not in ('=', '|'):
+                mask_patch = mask_patch.astype(mask_patch.dtype.newbyteorder('='))
         
         if self.transform:
             img_patch = self.transform(img_patch)
-            mask_patch = self.transform(mask_patch)
+            if self.train:
+                mask_patch = self.transform(mask_patch)
 
         if not self.train:
-            return img_patch/255.
+            return img_patch/255., row_start, col_start, img_idx
         
         return img_patch/255., mask_patch

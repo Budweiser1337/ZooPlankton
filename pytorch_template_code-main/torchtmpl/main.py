@@ -11,13 +11,14 @@ import yaml
 import wandb
 import torch
 import torchinfo.torchinfo as torchinfo
+import numpy as np
 
 # Local imports
 import data
 import models
 import optim
 import utils
-
+import submission
 
 def train(config):
     use_cuda = torch.cuda.is_available()
@@ -48,6 +49,7 @@ def train(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, input_size[0], 1)
+    model.load_state_dict(torch.load("logs/UNet_0/best_model.pt")) 
     model.to(device)
 
     # Build the loss
@@ -103,10 +105,17 @@ def train(config):
 
     for e in range(config["nepochs"]):
         # Train 1 epoch
-        train_loss = utils.train(model, train_loader, loss, optimizer, device)
+        # train_loss = utils.train(model, train_loader, loss, optimizer, device)
 
         # Test
-        test_loss = utils.test(model, valid_loader, loss, device)
+        # test_loss = utils.test(model, valid_loader, loss, device)
+
+        # Train 1 epoch
+        train_loss, train_metrics = utils.train(model, train_loader, loss, optimizer, device)
+
+        # Test
+        test_loss, test_metrics = utils.test(model, valid_loader, loss, device, writer=None, step=None)
+
 
         updated = model_checkpoint.update(test_loss)
         logging.info(
@@ -120,15 +129,71 @@ def train(config):
         )
 
         # Update the dashboard
-        metrics = {"train_CE": train_loss, "test_CE": test_loss}
+        metrics = {"train_CE": train_loss, "test_CE": test_loss,
+                   **{"train_"+k:v for k,v in train_metrics.items()},
+                   **{"test_"+k:v for k,v in test_metrics.items()}}
+        if writer is not None:
+            for k,v in metrics.items():
+                writer.add_scalar(tag="/".join(k.split("_")[::-1]).title(), scalar_value=v, global_step=e)
         if wandb_log is not None:
             logging.info("Logging on wandb")
             wandb_log(metrics)
 
-
 def test(config):
-    raise NotImplementedError
+    use_cuda = torch.cuda.is_available()
+    device = torch.device("cuda") if use_cuda else torch.device("cpu")
+    if use_cuda:
+        print("using gpu")
+    else:
+        print("using cpu")
 
+    # Build the dataloaders
+    logging.info("= Building the dataloaders")
+    data_config = config["data"]
+
+    test_loader, input_size, num_classes = data.get_test_dataloaders(
+        data_config, use_cuda
+    )
+
+    # Build the model
+    logging.info("= Model")
+    model_config = config["model"]
+    model = models.build_model(model_config, 1, 1)
+    model.load_state_dict(torch.load("logs/UNet_0/best_model.pt"))
+    model.to(device)
+
+    # Placeholder for reassembling predictions
+    full_predictions = {}
+    with torch.no_grad():
+        for inputs, row_starts, col_starts, img_idxs in test_loader:
+            inputs = inputs.to(device)
+            outputs = model(inputs)
+            predictions = torch.sigmoid(outputs).cpu().numpy()
+            predictions = (predictions >= 0.5).astype(np.int32)
+
+            # Iterate through predictions and metadata
+            for i, (row_start, col_start, img_idx) in enumerate(zip(row_starts, col_starts, img_idxs)):
+                row_start, col_start, img_idx = int(row_start), int(col_start), int(img_idx)
+                patch_size = inputs.shape[-1]
+
+                # Initialize full-sized prediction array if not already present
+                if img_idx not in full_predictions:
+                    height, width = test_loader.dataset.image_sizes[img_idx]
+                    full_predictions[img_idx] = np.zeros((height, width), dtype=np.float32)
+                if row_start + patch_size > full_predictions[img_idx].shape[0] or col_start + patch_size > full_predictions[img_idx].shape[1]:
+                    continue
+
+                # Place the prediction patch in the correct location
+                full_predictions[img_idx][
+                    row_start:row_start + patch_size,
+                    col_start:col_start + patch_size,
+                ] = predictions[i, 0]
+                
+    submission.generate_submission_file(full_predictions, output_dir=config["prediction"]["dir"])
+
+    # for img_idx, prediction in full_predictions.items():
+    #     save_path = os.path.join(config["prediction"]["dir"], f"prediction_{img_idx}.csv")
+    #     pd.DataFrame(prediction).to_csv(save_path, index=False, header=False)
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="%(message)s")

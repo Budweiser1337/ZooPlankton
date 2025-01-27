@@ -12,7 +12,7 @@ def makejob(commit_id, configpath, nruns):
 #SBATCH --job-name=templatecode
 #SBATCH --nodes=1
 #SBATCH --partition=gpu_prod_long
-#SBATCH --time=2:00:00
+#SBATCH --time=4:00:00
 #SBATCH --output=logslurms/slurm-%A_%a.out
 #SBATCH --error=logslurms/slurm-%A_%a.err
 #SBATCH --array=1-{nruns}
@@ -39,10 +39,10 @@ python3 -m venv venv
 source venv/bin/activate
 
 # Install the library
-python -m pip install .
+python3 -m pip install .
 
 echo "Training"
-python -m torchtmpl.main {configpath} train
+python3 torchtmpl/main.py {configpath} train
 
 if [[ $? != 0 ]]; then
     exit -1

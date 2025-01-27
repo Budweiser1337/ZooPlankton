@@ -10,14 +10,19 @@ optim:
   params:
     lr: 0.001
 
-nepochs: 100
-loss: "BCELoss"
+nepochs: 10
+loss: "BCEWithLogitsLoss"
 
 logging:
-  # wandb: 
-  #   project: sample_project
-  #   entity: sample_entity
+  wandb: 
+    project: Segmenting_Living_Organisms
+    entity: huyvan1337
   logdir: "./logs"  # Better to provide the fullpath, especially on the cluster
+
 model:
   class: UNet
+
+prediction:
+  dir: "./predictions/"
+
     

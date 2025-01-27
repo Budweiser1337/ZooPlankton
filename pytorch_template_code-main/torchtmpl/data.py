@@ -71,3 +71,34 @@ def get_dataloaders(data_config, use_cuda):
     input_size = tuple(base_dataset[0][0].shape)
 
     return train_loader, valid_loader, input_size, num_classes
+
+def get_test_dataloaders(data_config, use_cuda):
+    num_workers = data_config["num_workers"]
+
+    logging.info("  - Dataset creation")
+
+    input_transform = transforms.Compose(
+        [transforms.ToTensor()]
+    )
+    base_dataset = PlanktonDataset.PlanktonDataset(
+        dir=data_config["testpath"],
+        train=False,
+        patch_size=256,
+        transform=input_transform,
+    )
+
+    logging.info(f"  - I loaded {len(base_dataset)} samples")
+
+    # Build the dataloaders
+    test_loader = torch.utils.data.DataLoader(
+        base_dataset,
+        shuffle=True,
+        num_workers=num_workers,
+        pin_memory=use_cuda,
+    )
+
+    num_classes = 2
+    input_size = tuple(base_dataset[0][0].shape)
+
+    return test_loader, input_size, num_classes
+

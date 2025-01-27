@@ -7,8 +7,6 @@ import os
 import torch
 import torch.nn
 import tqdm
-import metrics
-import matplotlib.pyplot as plt
 
 
 def generate_unique_logpath(logdir, raw_run_name):
@@ -83,11 +81,6 @@ def train(model, loader, f_loss, optimizer, device, dynamic_display=True):
     model.train()
 
     total_loss = 0
-    total_metrics = {
-        "precision": 0,
-        "recall": 0,
-        "f1": 0,
-    }
     num_samples = 0
     for i, (inputs, targets) in (pbar := tqdm.tqdm(enumerate(loader))):
 
@@ -106,17 +99,13 @@ def train(model, loader, f_loss, optimizer, device, dynamic_display=True):
         # Update the metrics
         # We here consider the loss is batch normalized
         total_loss += inputs.shape[0] * loss.item()
-        train_metrics = metrics.compute_metrics(y_true=targets, y_pred=torch.sigmoid(outputs).argmax(dim=1))
-        for k in total_metrics:
-            total_metrics[k] += inputs.shape[0] * train_metrics[k]
-        total_loss += inputs.shape[0] * loss.item()
         num_samples += inputs.shape[0]
-        pbar.set_description(f"Train loss : {total_loss/num_samples:.2f}, F1 loss : {total_metrics['f1']/num_samples}")
+        pbar.set_description(f"Train loss : {total_loss/num_samples:.2f}")
 
-    return total_loss / num_samples, total_metrics
+    return total_loss / num_samples
 
 
-def test(model, loader, f_loss, device, writer=None, step=None):
+def test(model, loader, f_loss, device):
     """
     Test a model over the loader
     using the f_loss as metrics
@@ -134,11 +123,6 @@ def test(model, loader, f_loss, device, writer=None, step=None):
 
     total_loss = 0
     num_samples = 0
-    total_metrics = {
-        "precision": 0,
-        "recall": 0,
-        "f1": 0,
-    }
     for (inputs, targets) in loader:
 
         inputs, targets = inputs.to(device), targets.to(device)
@@ -151,32 +135,6 @@ def test(model, loader, f_loss, device, writer=None, step=None):
         # Update the metrics
         # We here consider the loss is batch normalized
         total_loss += inputs.shape[0] * loss.item()
-        test_metrics = metrics.compute_metrics(y_true=targets, y_pred=(torch.sigmoid(outputs) > 0.5).int())
-        for k in total_metrics:
-            total_metrics[k] += inputs.shape[0] * test_metrics[k]
         num_samples += inputs.shape[0]
 
-    # Plot some examples of segmentation results
-    if writer is not None and step is not None:
-        test_inputs = inputs[:2].detach().cpu().numpy()
-        test_outputs = (torch.sigmoid(outputs[:2]) > 0.5).int().detach().cpu().numpy()
-        fig, axes = plt.subplots(2,2, figsize=(12,8))
-        axes = axes.ravel()
-        for i, (img, seg_img) in enumerate(zip(test_inputs, test_outputs)):
-            axes[i].imshow(img[0], cmap="gray")
-            axes[i+2].imshow(seg_img[0], cmap="gray")
-            axes[i].set_title(f"Input {i}")
-            axes[i+2].set_title(f"Segmentation on input {i+1}")
-        plt.tight_layout()
-        writer.add_figure("Segmentation results", fig, global_step=step)
-
-    return total_loss / num_samples, total_metrics
-
-def get_logdir(logdir):
-    i = 0
-    while True:
-        log_path = logdir + "_" + str(i)
-        # log_path = logdir + "-" + str(i)
-        if not os.path.isdir(log_path):
-            return log_path
-        i = i + 1
+    return total_loss / num_samples
