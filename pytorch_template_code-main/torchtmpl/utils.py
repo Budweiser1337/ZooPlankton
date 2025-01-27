@@ -116,7 +116,7 @@ def train(model, loader, f_loss, optimizer, device, dynamic_display=True):
     return total_loss / num_samples, total_metrics
 
 
-def test(model, loader, f_loss, device, writer=None, step=None):
+def test(model, loader, f_loss, device):
     """
     Test a model over the loader
     using the f_loss as metrics
@@ -155,20 +155,6 @@ def test(model, loader, f_loss, device, writer=None, step=None):
         for k in total_metrics:
             total_metrics[k] += inputs.shape[0] * test_metrics[k]
         num_samples += inputs.shape[0]
-
-    # Plot some examples of segmentation results
-    if writer is not None and step is not None:
-        test_inputs = inputs[:2].detach().cpu().numpy()
-        test_outputs = (torch.sigmoid(outputs[:2]) > 0.5).int().detach().cpu().numpy()
-        fig, axes = plt.subplots(2,2, figsize=(12,8))
-        axes = axes.ravel()
-        for i, (img, seg_img) in enumerate(zip(test_inputs, test_outputs)):
-            axes[i].imshow(img[0], cmap="gray")
-            axes[i+2].imshow(seg_img[0], cmap="gray")
-            axes[i].set_title(f"Input {i}")
-            axes[i+2].set_title(f"Segmentation on input {i+1}")
-        plt.tight_layout()
-        writer.add_figure("Segmentation results", fig, global_step=step)
 
     return total_loss / num_samples, total_metrics
 
