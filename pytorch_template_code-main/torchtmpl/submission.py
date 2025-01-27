@@ -1,6 +1,5 @@
 # External imports
 import numpy as np
-import pandas as pd
 
 def binary_list_to_string(binary_list, num_bits=6, offset=48):
     if len(binary_list) % num_bits != 0:
