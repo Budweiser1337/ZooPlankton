@@ -49,7 +49,7 @@ def train(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, input_size[0], 1)
-    # model.load_state_dict(torch.load("logs/UNet_0/best_model.pt")) 
+    model.load_state_dict(torch.load("logs/UNet_best/best_model.pt")) 
     model.to(device)
 
     # Build the loss
@@ -132,9 +132,6 @@ def train(config):
         metrics = {"train_CE": train_loss, "test_CE": test_loss,
                    **{"train_"+k:v for k,v in train_metrics.items()},
                    **{"test_"+k:v for k,v in test_metrics.items()}}
-        if writer is not None:
-            for k,v in metrics.items():
-                writer.add_scalar(tag="/".join(k.split("_")[::-1]).title(), scalar_value=v, global_step=e)
         if wandb_log is not None:
             logging.info("Logging on wandb")
             wandb_log(metrics)
@@ -159,7 +156,7 @@ def test(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, 1, 1)
-    model.load_state_dict(torch.load("logs/UNet_0/best_model.pt"))
+    model.load_state_dict(torch.load("logs/UNet_best/best_model.pt"))
     model.to(device)
 
     # Placeholder for reassembling predictions
