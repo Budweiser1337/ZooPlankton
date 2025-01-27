@@ -27,7 +27,7 @@ echo "Running on " $(hostname)
 echo "Copying the source directory and data"
 date
 mkdir $TMPDIR/code
-rsync -r --exclude logs --exclude logslurms --exclude configs . $TMPDIR/code
+rsync -r --exclude logs --exclude logslurms --exclude configs --include ".git/" . $TMPDIR/code
 
 echo "Checking out the correct version of the code commit_id {commit_id}"
 cd $TMPDIR/code
