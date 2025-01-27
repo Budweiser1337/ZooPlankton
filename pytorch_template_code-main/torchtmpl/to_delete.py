@@ -33,11 +33,11 @@ predictions = np.random.randint(0, 2, (2, 3, 78))
 output_dir = "./to_delete"
 
 # Call the function to generate the submission file
-# submission.generate_submission_file(predictions, output_dir)
+submission.generate_submission_file(predictions, output_dir)
 
-import PlanktonDataset
-test = PlanktonDataset.PlanktonDataset(dir='/mounts/Datasets3/2024-2025-ChallengePlankton/test/', patch_size=256, train=False)
-print(test[1])
+# import PlanktonDataset
+# test = PlanktonDataset.PlanktonDataset(dir='/mounts/Datasets3/2024-2025-ChallengePlankton/test/', patch_size=256, train=False)
+# print(test[1])
 
 
 

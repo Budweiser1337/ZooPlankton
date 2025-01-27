@@ -105,15 +105,14 @@ def train(model, loader, f_loss, optimizer, device, dynamic_display=True):
 
         # Update the metrics
         # We here consider the loss is batch normalized
-        total_loss += inputs.shape[0] * loss.item()
-        train_metrics = metrics.compute_metrics(y_true=targets, y_pred=torch.sigmoid(outputs).argmax(dim=1))
+        train_metrics = metrics.compute_metrics(y_true=targets, y_pred=(torch.sigmoid(outputs) > 0.5).int())
         for k in total_metrics:
             total_metrics[k] += inputs.shape[0] * train_metrics[k]
         total_loss += inputs.shape[0] * loss.item()
         num_samples += inputs.shape[0]
-        pbar.set_description(f"Train loss : {total_loss/num_samples:.2f}, F1 loss : {total_metrics['f1']/num_samples}")
-
-    return total_loss / num_samples, total_metrics
+        pbar.set_description(f"Train loss : {total_loss/num_samples:.2f}, F1 score : {total_metrics['f1']/num_samples}")
+        
+    return total_loss / num_samples, {k: v / num_samples for k, v in total_metrics.items()}
 
 
 def test(model, loader, f_loss, device):
@@ -155,7 +154,7 @@ def test(model, loader, f_loss, device):
         for k in total_metrics:
             total_metrics[k] += inputs.shape[0] * test_metrics[k]
         num_samples += inputs.shape[0]
-
+    total_metrics = {k: v / num_samples for k, v in total_metrics.items()}
     return total_loss / num_samples, total_metrics
 
 def get_logdir(logdir):
