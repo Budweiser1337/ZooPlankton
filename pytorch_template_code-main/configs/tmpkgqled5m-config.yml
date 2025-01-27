@@ -10,7 +10,7 @@ optim:
   params:
     lr: 0.001
 
-nepochs: 25
+nepochs: 10
 loss: "BCEWithLogitsLoss"
 
 logging:
