@@ -114,7 +114,7 @@ def train(config):
         train_loss, train_metrics = utils.train(model, train_loader, loss, optimizer, device)
 
         # Test
-        test_loss, test_metrics = utils.test(model, valid_loader, loss, device, writer=None, step=None)
+        test_loss, test_metrics = utils.test(model, valid_loader, loss, device)
 
 
         updated = model_checkpoint.update(test_loss)
