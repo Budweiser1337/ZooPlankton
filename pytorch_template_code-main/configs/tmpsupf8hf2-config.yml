@@ -1,7 +1,7 @@
 data:
   trainpath: /mounts/Datasets3/2024-2025-ChallengePlankton/train
   testpath: /mounts/Datasets3/2024-2025-ChallengePlankton/test
-  batch_size: 32
+  batch_size: 16
   num_workers: 4
   valid_ratio: 0.2
 
@@ -9,13 +9,13 @@ optim:
   algo: SGD
   params:
     lr: 0.001
-    momentum: 0.9
+    # momentum: 0.9
 
 nepochs: 20
 loss: 
   name: "BCEWithLogitsLoss"
-  params:
-    pos_weight: [25.6] # Positive count: 256821124  Negative count: 6591428732
+  # params:
+    # pos_weight: [25.6] # Positive count: 256821124  Negative count: 6591428732
 
 
 logging:
