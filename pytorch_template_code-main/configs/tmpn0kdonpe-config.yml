@@ -9,13 +9,12 @@ optim:
   algo: SGD
   params:
     lr: 0.001
-    momentum: 0.9
 
 nepochs: 15
 loss: 
   name: "WeightedBCEWithLogitsLoss"
   params:
-    pos_weight: [25.6] # Positive count: 256821124  Negative count: 6591428732
+    pos_weight: [49.]
 
 
 logging:
