@@ -9,18 +9,18 @@ optim:
   algo: SGD
   params:
     lr: 0.001
-    # momentum: 0.9
+    momentum: 0.9
 
-nepochs: 20
+nepochs: 15
 loss: 
-  name: "BCEWithLogitsLoss"
-  # params:
-    # pos_weight: [25.6] # Positive count: 256821124  Negative count: 6591428732
+  name: "WeightedBCEWithLogitsLoss"
+  params:
+    pos_weight: [25.6] # Positive count: 256821124  Negative count: 6591428732
 
 
 logging:
   wandb: 
-    project: Kaggle_Challenge
+    project: Segmenting_Living_Organisms
     entity: huyvan1337
   logdir: "/usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/model_logs"  # Better to provide the fullpath, especially on the cluster
 
