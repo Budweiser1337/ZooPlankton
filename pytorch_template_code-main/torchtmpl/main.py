@@ -10,6 +10,7 @@ import pathlib
 import yaml
 import wandb
 import torch
+import torch.nn as nn
 import torchinfo.torchinfo as torchinfo
 import numpy as np
 
