@@ -54,7 +54,12 @@ def train(config):
 
     # Build the loss
     logging.info("= Loss")
-    loss = optim.get_loss(config["loss"])
+    # loss = optim.get_loss(config["loss"])
+    if config["loss"]["name"] == "WeightedBCEWithLogitsLoss":
+        pos_weight = torch.tensor(config["loss"]["params"]["pos_weight"], device="cuda" if torch.cuda.is_available() else "cpu")
+        loss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    else:
+        loss = nn.BCEWithLogitsLoss()
 
     # Build the optimizer
     logging.info("= Optimizer")

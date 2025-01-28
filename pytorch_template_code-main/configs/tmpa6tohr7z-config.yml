@@ -11,17 +11,13 @@ optim:
     lr: 0.001
 
 nepochs: 25
-loss: 
-  name: "WeightedBCEWithLogitsLoss"
-  params:
-    pos_weight: [49.]
-
+loss: "BCEWithLogitsLoss"
 
 logging:
   wandb: 
     project: Segmenting_Living_Organisms
     entity: huyvan1337
-  logdir: "/usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/model_logs"  # Better to provide the fullpath, especially on the cluster
+  logdir: "./logs"  # Better to provide the fullpath, especially on the cluster
 
 model:
   class: UNet
