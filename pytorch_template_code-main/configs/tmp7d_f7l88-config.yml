@@ -10,7 +10,7 @@ optim:
   params:
     lr: 0.001
     # weight_decay: 0.001
-    momentum: 0.9
+    # momentum: 0.9
 
 nepochs: 50
 loss: 
