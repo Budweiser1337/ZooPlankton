@@ -13,6 +13,7 @@ import torch
 import torch.nn as nn
 import torchinfo.torchinfo as torchinfo
 import numpy as np
+from tqdm import tqdm
 
 # Local imports
 import data
@@ -162,37 +163,55 @@ def test(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, 1, 1)
-    model.load_state_dict(torch.load("logs/UNet_best/best_model.pt"))
+    model.load_state_dict(torch.load("model_logs/UNet_3/best_model.pt"))
     model.to(device)
-
-    # Placeholder for reassembling predictions
     full_predictions = {}
-    with torch.no_grad():
-        for inputs, row_starts, col_starts, img_idxs in test_loader:
-            inputs = inputs.to(device)
-            outputs = model(inputs)
-            predictions = torch.sigmoid(outputs).cpu().numpy()
-            predictions = (predictions >= 0.5).astype(np.int32)
+    # Inference
+    logging.info("= Running inference on the test set")
+    predictions = []
+    image_indices = []
+    patch_positions = []
 
-            # Iterate through predictions and metadata
-            for i, (row_start, col_start, img_idx) in enumerate(zip(row_starts, col_starts, img_idxs)):
-                row_start, col_start, img_idx = int(row_start), int(col_start), int(img_idx)
-                patch_size = inputs.shape[-1]
+    with torch.no_grad():  # Disable gradient computation
+        for batch in tqdm(test_loader):
+            images, row_starts, col_starts, img_indices = batch
+            images = images.to(device)
 
-                # Initialize full-sized prediction array if not already present
-                if img_idx not in full_predictions:
-                    height, width = test_loader.dataset.image_sizes[img_idx]
-                    full_predictions[img_idx] = np.zeros((height, width), dtype=np.float32)
-                if row_start + patch_size > full_predictions[img_idx].shape[0] or col_start + patch_size > full_predictions[img_idx].shape[1]:
-                    continue
+            # Forward pass
+            outputs = model(images)
 
-                # Place the prediction patch in the correct location
-                full_predictions[img_idx][
-                    row_start:row_start + patch_size,
-                    col_start:col_start + patch_size,
-                ] = predictions[i, 0]
+            # Collect predictions
+
+            for i in range(outputs.shape[0]):
+                predictions.append(outputs[i].cpu().numpy())
+                #predictions.append(((torch.sigmoid(outputs[i]).cpu().numpy()) >= 0.5).astype(np.int32))  # Move prediction to CPU
+                patch_positions.append((row_starts[i].item(), col_starts[i].item()))
+                image_indices.append(img_indices[i].item())
+
+        logging.info("= Reconstructing full images from patches")
+        reconstructed_images = {}
+        for pred, (row_start, col_start), img_idx in zip(predictions, patch_positions, image_indices):
+            if img_idx not in reconstructed_images:
+                width, height = test_loader.dataset.image_sizes[img_idx]
+                reconstructed_images[img_idx] = np.zeros((height, width), dtype=np.float32)
+
+            patch_size = test_loader.dataset.patch_size
+            row_end = row_start + patch_size
+            col_end = col_start + patch_size
+            reconstructed_images[img_idx][row_start:row_end, col_start:col_end] = pred.squeeze()
+        binary_predictions = []
+        for img_idx in sorted(reconstructed_images.keys()):
+            binary_prediction = (reconstructed_images[img_idx] > 0.5).astype(np.uint8)  # Apply threshold
+            binary_predictions.append(binary_prediction)
+
+        print(f"Number of predictions: {len(binary_predictions)}")
+        total_pixels = sum(pred.size for pred in binary_predictions)
+        print(total_pixels)
+        # Generate submission file
+        # submission.generate_submission_file(binary_predictions, output_dir=config["prediction"]["dir"])
+
                 
-    submission.generate_submission_file(full_predictions, output_dir=config["prediction"]["dir"])
+    # submission.generate_submission_file(full_predictions, output_dir=config["prediction"]["dir"])
 
     # for img_idx, prediction in full_predictions.items():
     #     save_path = os.path.join(config["prediction"]["dir"], f"prediction_{img_idx}.csv")

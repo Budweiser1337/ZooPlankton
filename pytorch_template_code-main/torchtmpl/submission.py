@@ -28,8 +28,8 @@ def generate_submission_file(predictions, output_dir):
         # Iterate over the predictions for each image
         for mask_id in range(len(predictions)):
             prediction = predictions[mask_id]
-            
+            modified_mask_name = mask_names[mask_id].replace("scan", "mask")
             # Iterate over the rows of the prediction and write them in the required format
             for idx_row, row in enumerate(prediction):
                 mystr = array_to_string(row)
-                f.write(f"{mask_names[mask_id]}_{idx_row},\"{mystr}\"\n")
+                f.write(f"{modified_mask_name}_{idx_row},\"{mystr}\"\n")
