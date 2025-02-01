@@ -14,7 +14,7 @@ import torch.nn as nn
 import torchinfo.torchinfo as torchinfo
 import numpy as np
 from tqdm import tqdm
-import torchvision.models.segmentation as models
+import torchvision.models.segmentation as torchmodels
 
 
 # Local imports
@@ -55,7 +55,7 @@ def train(config):
     # model = models.build_model(model_config, input_size[0], 1)
     # model.load_state_dict(torch.load("/usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/model_logs/UNet_3/best_model.pt")) 
     # Load DeepLabV3+ with ResNet backbone
-    model = models.deeplabv3_resnet50(pretrained=True)
+    model = torchmodels.deeplabv3_resnet50(pretrained=True)
     num_classes = 1
     model.classifier[4] = torch.nn.Conv2d(256, num_classes, kernel_size=(1, 1))
     model.to(device)
