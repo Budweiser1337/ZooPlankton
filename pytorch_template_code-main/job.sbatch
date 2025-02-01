@@ -20,9 +20,9 @@ date
 mkdir $TMPDIR/code
 rsync -r --exclude logs --exclude logslurms --exclude configs --include ".git/" . $TMPDIR/code
 
-echo "Checking out the correct version of the code commit_id 6fe63824085ef44c893ce329ea326fa79f0ffeda"
+echo "Checking out the correct version of the code commit_id 790d6601adc4c025705c5311f32784d429646314"
 cd $TMPDIR/code
-git checkout 6fe63824085ef44c893ce329ea326fa79f0ffeda
+git checkout 790d6601adc4c025705c5311f32784d429646314
 
 
 echo "Setting up the virtual environment"
@@ -34,7 +34,7 @@ python3 -m pip install .
 # python3 -m pip install transformers
 
 echo "Training"
-python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmpwe18hwx4-config.yml train
+python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmpw4f1teqo-config.yml train
 
 if [[ $? != 0 ]]; then
     exit -1
