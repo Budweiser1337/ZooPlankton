@@ -40,6 +40,7 @@ source venv/bin/activate
 
 # Install the library
 python3 -m pip install .
+python3 -m pip install transformers
 
 echo "Training"
 python3 torchtmpl/main.py {configpath} train
