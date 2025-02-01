@@ -58,13 +58,16 @@ def train(config):
     model = torchmodels.deeplabv3_resnet50(pretrained=True)
     num_classes = 1
     model.classifier[4] = torch.nn.Conv2d(256, num_classes, kernel_size=(1, 1))
-    model.backbone.body.conv1 = torch.nn.Conv2d(
+    resnet_backbone = model.backbone.body
+
+    # Modify the first convolutional layer to accept 1 channel
+    resnet_backbone.conv1 = torch.nn.Conv2d(
         in_channels=1,
-        out_channels=model.backbone.body.conv1.out_channels,  # Keep the number of output channels the same
-        kernel_size=model.backbone.body.conv1.kernel_size,
-        stride=model.backbone.body.conv1.stride,
-        padding=model.backbone.body.conv1.padding,
-        bias=model.backbone.body.conv1.bias is not None
+        out_channels=resnet_backbone.conv1.out_channels,
+        kernel_size=resnet_backbone.conv1.kernel_size,
+        stride=resnet_backbone.conv1.stride,
+        padding=resnet_backbone.conv1.padding,
+        bias=resnet_backbone.conv1.bias is not None
     )
     model.to(device)
 
