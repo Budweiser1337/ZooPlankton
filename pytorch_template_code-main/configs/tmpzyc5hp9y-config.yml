@@ -15,8 +15,8 @@ optim:
 nepochs: 50
 loss: 
   name: "BCEWithLogitsLoss"
-  params:
-    pos_weight: [12.]
+  # params:
+    # pos_weight: [25.6] # Positive count: 256821124  Negative count: 6591428732
 
 
 logging:

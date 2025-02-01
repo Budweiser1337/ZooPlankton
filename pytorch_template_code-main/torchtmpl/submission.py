@@ -1,5 +1,6 @@
 # External imports
 import numpy as np
+from tqdm import tqdm
 
 def binary_list_to_string(binary_list, num_bits=6, offset=48):
     if len(binary_list) % num_bits != 0:
@@ -26,10 +27,10 @@ def generate_submission_file(predictions, output_dir):
         f.write("Id,Target\n")
 
         # Iterate over the predictions for each image
-        for mask_id in range(len(predictions)):
+        for mask_id in tqdm(range(len(predictions))):
             prediction = predictions[mask_id]
             modified_mask_name = mask_names[mask_id].replace("scan", "mask")
             # Iterate over the rows of the prediction and write them in the required format
-            for idx_row, row in enumerate(prediction):
+            for idx_row, row in enumerate(tqdm(prediction, leave=False)):
                 mystr = array_to_string(row)
                 f.write(f"{modified_mask_name}_{idx_row},\"{mystr}\"\n")
