@@ -20,9 +20,9 @@ date
 mkdir $TMPDIR/code
 rsync -r --exclude logs --exclude logslurms --exclude configs --include ".git/" . $TMPDIR/code
 
-echo "Checking out the correct version of the code commit_id 5008e079d0d4451a7c346fbf750eb09b392c6083"
+echo "Checking out the correct version of the code commit_id d4a4e7159845d5bc3ff88fe94fff0efab9b0576a"
 cd $TMPDIR/code
-git checkout 5008e079d0d4451a7c346fbf750eb09b392c6083
+git checkout d4a4e7159845d5bc3ff88fe94fff0efab9b0576a
 
 
 echo "Setting up the virtual environment"
@@ -33,7 +33,7 @@ source venv/bin/activate
 python3 -m pip install .
 
 echo "Training"
-python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmp7i3xoyxw-config.yml train
+python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmpk_rvpwwg-config.yml train
 
 if [[ $? != 0 ]]; then
     exit -1
