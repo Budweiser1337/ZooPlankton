@@ -3,7 +3,7 @@
 #SBATCH --job-name=templatecode
 #SBATCH --nodes=1
 #SBATCH --partition=gpu_prod_long
-#SBATCH --time=20:00:00
+#SBATCH --time=4:00:00
 #SBATCH --output=logslurms/slurm-%A_%a.out
 #SBATCH --error=logslurms/slurm-%A_%a.err
 #SBATCH --array=1-1
@@ -20,9 +20,9 @@ date
 mkdir $TMPDIR/code
 rsync -r --exclude logs --exclude logslurms --exclude configs --include ".git/" . $TMPDIR/code
 
-echo "Checking out the correct version of the code commit_id 451737b054b12f0189a554bb341086b5e60a9d48"
+echo "Checking out the correct version of the code commit_id 325e7898835c424b77c3b166b05b3a3b757bfa93"
 cd $TMPDIR/code
-git checkout 451737b054b12f0189a554bb341086b5e60a9d48
+git checkout 325e7898835c424b77c3b166b05b3a3b757bfa93
 
 
 echo "Setting up the virtual environment"
@@ -33,7 +33,7 @@ source venv/bin/activate
 python3 -m pip install .
 
 echo "Training"
-python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmp4hnsby_t-config.yml train
+python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/configs/tmpwgyydl2e-config.yml train
 
 if [[ $? != 0 ]]; then
     exit -1
