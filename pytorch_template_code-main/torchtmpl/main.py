@@ -129,12 +129,6 @@ def train(config):
 
     for e in range(config["nepochs"]):
         # Train 1 epoch
-        # train_loss = utils.train(model, train_loader, loss, optimizer, device)
-
-        # Test
-        # test_loss = utils.test(model, valid_loader, loss, device)
-
-        # Train 1 epoch
         train_loss, train_metrics = utils.train(model, train_loader, loss, optimizer, device)
 
         # Test
