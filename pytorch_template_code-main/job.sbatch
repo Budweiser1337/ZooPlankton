@@ -3,7 +3,7 @@
 #SBATCH --job-name=templatecode
 #SBATCH --nodes=1
 #SBATCH --partition=gpu_prod_long
-#SBATCH --time=8:00:00
+#SBATCH --time=20:00:00
 #SBATCH --output=logslurms/slurm-%A_%a.out
 #SBATCH --error=logslurms/slurm-%A_%a.err
 #SBATCH --array=1-1
@@ -20,9 +20,9 @@ date
 mkdir $TMPDIR/code
 rsync -r --exclude logs --exclude logslurms --exclude configs --include ".git/" . $TMPDIR/code
 
-echo "Checking out the correct version of the code commit_id fba279ddcc9b352a729de3beff1978eec5f72c89"
+echo "Checking out the correct version of the code commit_id 854326ebee12b6d7e709b89f279a7785bd1fe4cf"
 cd $TMPDIR/code
-git checkout fba279ddcc9b352a729de3beff1978eec5f72c89
+git checkout 854326ebee12b6d7e709b89f279a7785bd1fe4cf
 
 
 echo "Setting up the virtual environment"
@@ -33,7 +33,7 @@ source venv/bin/activate
 python3 -m pip install .
 
 echo "Training"
-python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmpc0cq7mli-config.yml train
+python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmphq_fns38-config.yml train
 
 if [[ $? != 0 ]]; then
     exit -1
