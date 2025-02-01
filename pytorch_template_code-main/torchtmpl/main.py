@@ -165,14 +165,14 @@ def test(config):
     model = models.build_model(model_config, 1, 1)
     model.load_state_dict(torch.load("model_logs/UNet_3/best_model.pt"))
     model.to(device)
-    full_predictions = {}
+
     # Inference
     logging.info("= Running inference on the test set")
     predictions = []
     image_indices = []
     patch_positions = []
 
-    with torch.no_grad():  # Disable gradient computation
+    with torch.no_grad():
         for batch in tqdm(test_loader):
             images, row_starts, col_starts, img_indices = batch
             images = images.to(device)
@@ -181,10 +181,8 @@ def test(config):
             outputs = model(images)
 
             # Collect predictions
-
             for i in range(outputs.shape[0]):
                 predictions.append(outputs[i].cpu().numpy())
-                #predictions.append(((torch.sigmoid(outputs[i]).cpu().numpy()) >= 0.5).astype(np.int32))  # Move prediction to CPU
                 patch_positions.append((row_starts[i].item(), col_starts[i].item()))
                 image_indices.append(img_indices[i].item())
 
@@ -204,18 +202,7 @@ def test(config):
             binary_prediction = (reconstructed_images[img_idx] > 0.5).astype(np.uint8)  # Apply threshold
             binary_predictions.append(binary_prediction)
 
-        print(f"Number of predictions: {len(binary_predictions)}")
-        total_pixels = sum(pred.size for pred in binary_predictions)
-        print(total_pixels)
-        # Generate submission file
-        # submission.generate_submission_file(binary_predictions, output_dir=config["prediction"]["dir"])
-
-                
-    # submission.generate_submission_file(full_predictions, output_dir=config["prediction"]["dir"])
-
-    # for img_idx, prediction in full_predictions.items():
-    #     save_path = os.path.join(config["prediction"]["dir"], f"prediction_{img_idx}.csv")
-    #     pd.DataFrame(prediction).to_csv(save_path, index=False, header=False)
+        submission.generate_submission_file(binary_predictions, output_dir=config["prediction"]["dir"])
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="%(message)s")
