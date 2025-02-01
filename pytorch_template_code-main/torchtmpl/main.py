@@ -58,7 +58,7 @@ def train(config):
     model = torchmodels.deeplabv3_resnet50(pretrained=True)
     num_classes = 1
     model.classifier[4] = torch.nn.Conv2d(256, num_classes, kernel_size=(1, 1))
-    resnet_backbone = model.backbone.body
+    resnet_backbone = model.backbone[0]
 
     # Modify the first convolutional layer to accept 1 channel
     resnet_backbone.conv1 = torch.nn.Conv2d(
