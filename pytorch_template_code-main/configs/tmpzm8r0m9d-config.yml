@@ -6,7 +6,7 @@ data:
   valid_ratio: 0.2
 
 optim:
-  algo: Adam
+  algo: AdamW
   params:
     lr: 0.001
     # momentum: 0.9
