@@ -6,16 +6,16 @@ data:
   valid_ratio: 0.2
 
 optim:
-  algo: SGD
+  algo: Adam
   params:
     lr: 0.001
-    momentum: 0.9
+    # momentum: 0.9
 
-nepochs: 20
+nepochs: 50
 loss: 
   name: "BCEWithLogitsLoss"
-  params:
-    pos_weight: [25.6] # Positive count: 256821124  Negative count: 6591428732
+  # params:
+    # pos_weight: [25.6] # Positive count: 256821124  Negative count: 6591428732
 
 
 logging:

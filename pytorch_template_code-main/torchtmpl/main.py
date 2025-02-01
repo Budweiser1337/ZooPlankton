@@ -51,7 +51,7 @@ def train(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, input_size[0], 1)
-    # model.load_state_dict(torch.load("logs/UNet_best/best_model.pt")) 
+    model.load_state_dict(torch.load("/usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/model_logs/UNet_3")) 
     model.to(device)
 
     # Build the loss
@@ -163,7 +163,7 @@ def test(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, 1, 1)
-    model.load_state_dict(torch.load("model_logs/UNet_3/best_model.pt"))
+    model.load_state_dict(torch.load("logs/UNet_best/best_model.pt"))
     model.to(device)
 
     # Inference
