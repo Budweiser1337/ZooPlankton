@@ -14,6 +14,7 @@ import torch.nn as nn
 import torchinfo.torchinfo as torchinfo
 import numpy as np
 from tqdm import tqdm
+from transformers import SegformerForSemanticSegmentation
 
 # Local imports
 import data
@@ -50,8 +51,9 @@ def train(config):
     # Build the model
     logging.info("= Model")
     model_config = config["model"]
-    model = models.build_model(model_config, input_size[0], 1)
+    # model = models.build_model(model_config, input_size[0], 1)
     # model.load_state_dict(torch.load("/usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/model_logs/UNet_3/best_model.pt")) 
+    model = SegformerForSemanticSegmentation.from_pretrained("nvidia/segformer-b0-finetuned-ade-512-512", num_labels=1)
     model.to(device)
 
     # Build the loss
