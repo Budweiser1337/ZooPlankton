@@ -174,7 +174,7 @@ def test(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, 1, 1)
-    model.load_state_dict(torch.load("model_logs/UNet_3/best_model.pt"))
+    model.load_state_dict(torch.load("model_logs/UNet_0/best_model.pt"))
     model.to(device)
 
     # Inference
