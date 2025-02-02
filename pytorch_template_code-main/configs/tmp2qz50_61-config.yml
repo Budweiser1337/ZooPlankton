@@ -15,8 +15,8 @@ optim:
 nepochs: 50
 loss: 
   name: "BCEWithLogitsLoss"
-  # params:
-  #   pos_weight: [9.]
+  params:
+    pos_weight: [9.]
 
 
 logging:
