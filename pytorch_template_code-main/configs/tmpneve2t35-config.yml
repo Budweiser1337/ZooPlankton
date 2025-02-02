@@ -1,8 +1,8 @@
 data:
   trainpath: /mounts/Datasets3/2024-2025-ChallengePlankton/train
   testpath: /mounts/Datasets3/2024-2025-ChallengePlankton/test
-  batch_size: 12
-  num_workers: 4
+  batch_size: 32
+  num_workers: 8
   valid_ratio: 0.2
 
 optim:
