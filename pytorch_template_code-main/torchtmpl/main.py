@@ -53,7 +53,7 @@ def train(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, input_size[0], 1)
-    model.load_state_dict(torch.load("/usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/model_logs/UNet_8/best_model.pt")) 
+    # model.load_state_dict(torch.load("/usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/model_logs/UNet_8/best_model.pt")) 
     # Load DeepLabV3+ with ResNet backbone
     # model = torchmodels.deeplabv3_resnet50(pretrained=False)
     # num_classes = 1
@@ -124,7 +124,7 @@ def train(config):
 
     # Define the early stopping callback
     model_checkpoint = utils.ModelCheckpoint(
-        model, str(logdir / "best_model.pt"), min_is_best=True
+        model, str(logdir / "best_model.pt"), min_is_best=False
     )
 
     for e in range(config["nepochs"]):
@@ -135,13 +135,13 @@ def train(config):
         test_loss, test_metrics = utils.test(model, valid_loader, loss, device)
 
 
-        updated = model_checkpoint.update(test_loss)
+        updated = model_checkpoint.update(test_metrics["f1"])
         logging.info(
-            "[%d/%d] Test loss : %.3f %s"
+            "[%d/%d] Test F1-score : %.3f %s"
             % (
                 e,
                 config["nepochs"],
-                test_loss,
+                test_metrics["f1"],
                 "[>> BETTER <<]" if updated else "",
             )
         )
@@ -174,7 +174,7 @@ def test(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, 1, 1)
-    model.load_state_dict(torch.load("model_logs/UNet_8/best_model.pt"))
+    model.load_state_dict(torch.load("model_logs/UNet_3/best_model.pt"))
     model.to(device)
 
     # Inference
@@ -190,10 +190,10 @@ def test(config):
 
             # Forward pass
             outputs = model(images)
-
+            outputs = (torch.sigmoid(outputs > 0)).byte().cpu().numpy()
             # Collect predictions
             for i in range(outputs.shape[0]):
-                predictions.append(outputs[i].cpu().numpy())
+                predictions.append(outputs[i])
                 patch_positions.append((row_starts[i].item(), col_starts[i].item()))
                 image_indices.append(img_indices[i].item())
 
@@ -208,12 +208,8 @@ def test(config):
             row_end = row_start + patch_size
             col_end = col_start + patch_size
             reconstructed_images[img_idx][row_start:row_end, col_start:col_end] = pred.squeeze()
-        binary_predictions = []
-        for img_idx in sorted(reconstructed_images.keys()):
-            binary_prediction = (reconstructed_images[img_idx] > 0.5).astype(np.uint8)  # Apply threshold
-            binary_predictions.append(binary_prediction)
 
-        submission.generate_submission_file(binary_predictions, output_dir=config["prediction"]["dir"])
+        submission.generate_submission_file(list(reconstructed_images.values()), output_dir=config["prediction"]["dir"])
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="%(message)s")
