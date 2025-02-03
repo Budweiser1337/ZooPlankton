@@ -2,7 +2,6 @@
 
 #SBATCH --job-name=training
 #SBATCH --nodes=1
-#SBATCH --constraint=sh[01-09,20-22]
 #SBATCH --partition=gpu_prod_long
 #SBATCH --time=24:00:00
 #SBATCH --output=logslurms/slurm-%A_%a.out
@@ -21,9 +20,9 @@ date
 mkdir $TMPDIR/code
 rsync -r --exclude logs --exclude logslurms --exclude configs --include ".git/" . $TMPDIR/code
 
-echo "Checking out the correct version of the code commit_id 5dc1c584da396f7f136d9e9c01e057f038ab0892"
+echo "Checking out the correct version of the code commit_id 79f6d6f07c6a8c3cf364a372ec30ec4d7c31f774"
 cd $TMPDIR/code
-git checkout 5dc1c584da396f7f136d9e9c01e057f038ab0892
+git checkout 79f6d6f07c6a8c3cf364a372ec30ec4d7c31f774
 
 
 echo "Setting up the virtual environment"
@@ -35,7 +34,7 @@ python3 -m pip install .
 # python3 -m pip install transformers
 
 echo "Training"
-python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmpgidcm21q-config.yml train
+python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmp6ac5e590-config.yml train
 
 if [[ $? != 0 ]]; then
     exit -1
