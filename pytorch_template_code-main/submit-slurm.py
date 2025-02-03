@@ -11,7 +11,6 @@ def makejob(commit_id, configpath, nruns):
 
 #SBATCH --job-name=training
 #SBATCH --nodes=1
-#SBATCH --constraint=sh[01-09,20-22]
 #SBATCH --partition=gpu_prod_long
 #SBATCH --time=24:00:00
 #SBATCH --output=logslurms/slurm-%A_%a.out
