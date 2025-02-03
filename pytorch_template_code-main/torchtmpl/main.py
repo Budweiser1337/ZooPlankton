@@ -53,7 +53,7 @@ def train(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, input_size[0], 1)
-    # model.load_state_dict(torch.load("/usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/model_logs/UNet_3/best_model.pt")) 
+    model.load_state_dict(torch.load("/usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/model_logs/UNet_8/best_model.pt")) 
     # Load DeepLabV3+ with ResNet backbone
     # model = torchmodels.deeplabv3_resnet50(pretrained=False)
     # num_classes = 1
