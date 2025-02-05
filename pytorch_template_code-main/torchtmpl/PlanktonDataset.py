@@ -78,12 +78,14 @@ def extract_patch_from_ppm(ppm_path, row_idx, col_idx, patch_size):
 
         f.seek(first_pixel_offset)  # Seek back to the first pixel
 
-         # Ensure the patch does not exceed the image dimensions
+         # Adjust the patch size if it goes beyond the image boundaries
         row_end = row_idx + patch_size[0]
         col_end = col_idx + patch_size[1]
         if row_end > nrows:
+            patch_size = (nrows - row_idx, patch_size[1])
             row_end = nrows
         if col_end > ncols:
+            patch_size = (patch_size[0], ncols - col_idx)
             col_end = ncols
         
         # Read all the rows of the patch from the image
@@ -94,7 +96,7 @@ def extract_patch_from_ppm(ppm_path, row_idx, col_idx, patch_size):
                 + ((row_idx + i) * ncols + col_idx) * nbytes_per_pixel,
                 0,  # whence
             )
-            row_data = f.read((col_end - col_idx) * nbytes_per_pixel)
+            row_data = f.read(patch_size[1] * nbytes_per_pixel)
             patch[i] = np.frombuffer(row_data, dtype=dtype)
 
     return patch
