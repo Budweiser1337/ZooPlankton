@@ -159,7 +159,7 @@ class PlanktonDataset(Dataset):
         if img_height < self.patch_size or img_width < self.patch_size:
             pad_height = self.patch_size - img_height
             pad_width = self.patch_size - img_width
-            img_patch = np.pad(img_patch, ((0, pad_height), (0, pad_width), (0, 0)), mode='constant', constant_values=255)
+            img_patch = np.pad(img_patch, ((0, pad_height), (0, pad_width)), mode='constant', constant_values=255)
 
             if self.train:
                 mask_patch = np.pad(mask_patch, ((0, pad_height), (0, pad_width)), mode='constant', constant_values=0)
