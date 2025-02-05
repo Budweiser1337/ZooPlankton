@@ -16,7 +16,7 @@ def get_loss(lossname, config):
         alpha = config["loss"]["params"]["alpha"]
         gamma = config["loss"]["params"]["gamma"]
         return lossf.FocalLoss(alpha=alpha, gamma=gamma)
-    return eval(f"nn.{lossname}()")
+    return eval(f"nn.{config["loss"]}()")
 
 
 def get_optimizer(cfg, params):
