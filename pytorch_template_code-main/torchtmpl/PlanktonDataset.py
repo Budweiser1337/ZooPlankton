@@ -120,8 +120,8 @@ class PlanktonDataset(Dataset):
             with Image.open(scan_path) as img:
                 width, height = img.size
             self.image_sizes[img_idx] = (width, height)
-            num_patches_x = width // patch_size
-            num_patches_y = height // patch_size
+            num_patches_x = (width + patch_size - 1) // patch_size
+            num_patches_y = (height + patch_size - 1) // patch_size
             
             for i in range(num_patches_y):
                 for j in range(num_patches_x):
@@ -137,12 +137,22 @@ class PlanktonDataset(Dataset):
         row_start = patch_i * self.patch_size
         col_start = patch_j * self.patch_size
         img_patch = extract_patch_from_ppm(self.scan_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
+        
         if self.train:
             mask_patch = extract_patch_from_ppm(self.mask_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
             mask_patch = mask_patch.astype(np.uint8)
             mask_patch = np.where(mask_patch <= 8., 0., 1.).astype(np.float32)
             if mask_patch.dtype.byteorder not in ('=', '|'):
                 mask_patch = mask_patch.astype(mask_patch.dtype.newbyteorder('='))
+                
+        img_height, img_width = img_patch.shape[:2]
+        if img_height < self.patch_size or img_width < self.patch_size:
+            pad_height = self.patch_size - img_height
+            pad_width = self.patch_size - img_width
+            img_patch = np.pad(img_patch, ((0, pad_height), (0, pad_width), (0, 0)), mode='constant', constant_values=255)
+
+            if self.train:
+                mask_patch = np.pad(mask_patch, ((0, pad_height), (0, pad_width)), mode='constant', constant_values=0)
         
         if self.transform:
             img_patch = self.transform(img_patch)
