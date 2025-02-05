@@ -78,8 +78,15 @@ def extract_patch_from_ppm(ppm_path, row_idx, col_idx, patch_size):
 
         f.seek(first_pixel_offset)  # Seek back to the first pixel
 
+         # Ensure the patch does not exceed the image dimensions
+        row_end = row_idx + patch_size[0]
+        col_end = col_idx + patch_size[1]
+        if row_end > nrows:
+            row_end = nrows
+        if col_end > ncols:
+            col_end = ncols
+        
         # Read all the rows of the patch from the image
-
         patch = np.zeros(patch_size, dtype=dtype)
         for i in range(patch_size[0]):
             f.seek(
@@ -144,6 +151,7 @@ class PlanktonDataset(Dataset):
             mask_patch = np.where(mask_patch <= 8., 0., 1.).astype(np.float32)
             if mask_patch.dtype.byteorder not in ('=', '|'):
                 mask_patch = mask_patch.astype(mask_patch.dtype.newbyteorder('='))
+            
                 
         img_height, img_width = img_patch.shape[:2]
         if img_height < self.patch_size or img_width < self.patch_size:
