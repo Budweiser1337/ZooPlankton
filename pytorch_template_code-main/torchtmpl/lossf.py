@@ -9,11 +9,12 @@ class FocalLoss(nn.Module):
         self.reduction = reduction
 
     def forward(self, inputs, targets):
-        # Apply sigmoid to logits to get probabilities
-        inputs = torch.sigmoid(inputs)
-        
+
         # Calculate the cross entropy loss
         BCE_loss = nn.BCEWithLogitsLoss(reduction='none')(inputs, targets)
+        
+        # Apply sigmoid to logits to get probabilities
+        inputs = torch.sigmoid(inputs)
         
         # Calculate p_t
         p_t = targets * inputs + (1 - targets) * (1 - inputs)
