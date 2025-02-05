@@ -73,12 +73,7 @@ def train(config):
 
     # Build the loss
     logging.info("= Loss")
-    # loss = optim.get_loss(config["loss"])
-    if config["loss"]["name"] == "WeightedBCEWithLogitsLoss":
-        pos_weight = torch.tensor(config["loss"]["params"]["pos_weight"], device="cuda" if torch.cuda.is_available() else "cpu")
-        loss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-    else:
-        loss = nn.BCEWithLogitsLoss()
+    loss = optim.get_loss(config["loss"], config)
 
     # Build the optimizer
     logging.info("= Optimizer")
@@ -174,7 +169,7 @@ def test(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, 1, 1)
-    model.load_state_dict(torch.load("model_logs/UNet_3/best_model.pt"))
+    model.load_state_dict(torch.load("model_logs/UNet_12/model.pt"))
     model.to(device)
 
     # Inference
@@ -190,7 +185,7 @@ def test(config):
 
             # Forward pass
             outputs = model(images)
-            outputs = (torch.sigmoid(outputs > 0)).byte().cpu().numpy()
+            outputs = (torch.sigmoid(outputs) > .5).byte().cpu().numpy()
             # Collect predictions
             for i in range(outputs.shape[0]):
                 predictions.append(outputs[i])
@@ -200,14 +195,18 @@ def test(config):
         logging.info("= Reconstructing full images from patches")
         reconstructed_images = {}
         for pred, (row_start, col_start), img_idx in zip(predictions, patch_positions, image_indices):
+            width, height = test_loader.dataset.image_sizes[img_idx]
             if img_idx not in reconstructed_images:
-                width, height = test_loader.dataset.image_sizes[img_idx]
                 reconstructed_images[img_idx] = np.zeros((height, width), dtype=np.float32)
 
             patch_size = test_loader.dataset.patch_size
-            row_end = row_start + patch_size
-            col_end = col_start + patch_size
-            reconstructed_images[img_idx][row_start:row_end, col_start:col_end] = pred.squeeze()
+            row_end = min(row_start + patch_size, height)
+            col_end = min(col_start + patch_size, width)
+
+            valid_patch_height = row_end - row_start
+            valid_patch_width = col_end - col_start
+            
+            reconstructed_images[img_idx][row_start:row_end, col_start:col_end] = pred[0, :valid_patch_height, :valid_patch_width]
 
         submission.generate_submission_file(list(reconstructed_images.values()), output_dir=config["prediction"]["dir"])
 

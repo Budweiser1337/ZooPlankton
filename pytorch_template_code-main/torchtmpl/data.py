@@ -29,8 +29,10 @@ def get_dataloaders(data_config, use_cuda):
 
     logging.info("  - Dataset creation")
 
-    input_transform = transforms.Compose(
-        [transforms.ToTensor()]
+    input_transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomVerticalFlip(p=0.5)]
     )
     base_dataset = PlanktonDataset.PlanktonDataset(
         dir=data_config["trainpath"],
@@ -83,7 +85,7 @@ def get_test_dataloaders(data_config, use_cuda):
     base_dataset = PlanktonDataset.PlanktonDataset(
         dir=data_config["testpath"],
         train=False,
-        patch_size=256,
+        patch_size=data_config["patch_size"],
         transform=input_transform,
     )
 
