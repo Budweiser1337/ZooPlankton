@@ -94,7 +94,7 @@ def extract_patch_from_ppm(ppm_path, row_idx, col_idx, patch_size):
                 + ((row_idx + i) * ncols + col_idx) * nbytes_per_pixel,
                 0,  # whence
             )
-            row_data = f.read(patch_size[1] * nbytes_per_pixel)
+            row_data = f.read((col_end - col_idx) * nbytes_per_pixel)
             patch[i] = np.frombuffer(row_data, dtype=dtype)
 
     return patch
