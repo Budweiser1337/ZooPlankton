@@ -73,7 +73,7 @@ def train(config):
 
     # Build the loss
     logging.info("= Loss")
-    loss = optim.get_loss(config["loss"], config)
+    loss = optim.get_loss(config["loss"]["name"], config)
 
     # Build the optimizer
     logging.info("= Optimizer")
