@@ -45,23 +45,20 @@ def get_dataloaders(data_config, use_cuda):
     logging.info(f"  - I loaded {len(base_dataset)} samples")
 
     indices = list(range(len(base_dataset)))
-    random.shuffle(indices)
+    # random.shuffle(indices)
+    
+    # Split into training and validation sets
     num_valid = int(valid_ratio * len(base_dataset))
-    train_indices = indices[num_valid:]
-    valid_indices = indices[:num_valid]
+    num_train = len(base_dataset) - num_valid
+    train_dataset, valid_dataset = torch.utils.data.random_split(base_dataset, [num_train, num_valid])
 
-    train_dataset = torch.utils.data.Subset(base_dataset, train_indices)
-    valid_dataset = torch.utils.data.Subset(base_dataset, valid_indices)
+    # Further split training dataset into two equal parts
+    half_size = len(train_dataset) // 2
+    train_dataset_1, train_dataset_2 = torch.utils.data.random_split(train_dataset, [half_size, len(train_dataset) - half_size])
 
-    indices_2 = list(range(len(train_dataset)))
-    half_size = int(0.5 * len(train_dataset))
-    # half_size = len(train_indices) // 2
-    train_indices_1 = train_indices[:half_size]
-    train_indices_2 = train_indices[half_size:]
-
-    # Build the dataloaders
+    # Create DataLoaders
     train_loader_1 = torch.utils.data.DataLoader(
-        torch.utils.data.Subset(train_dataset, train_indices_1),
+        train_dataset_1,
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
@@ -69,13 +66,13 @@ def get_dataloaders(data_config, use_cuda):
     )
 
     train_loader_2 = torch.utils.data.DataLoader(
-        torch.utils.data.Subset(train_dataset, train_indices_2),
+        train_dataset_2,
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
         pin_memory=use_cuda,
     )
-
+    
     valid_loader = torch.utils.data.DataLoader(
         valid_dataset,
         batch_size=batch_size,

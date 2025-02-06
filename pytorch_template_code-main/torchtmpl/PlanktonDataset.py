@@ -154,7 +154,6 @@ class PlanktonDataset(Dataset):
             if mask_patch.dtype.byteorder not in ('=', '|'):
                 mask_patch = mask_patch.astype(mask_patch.dtype.newbyteorder('='))
             
-                
         img_height, img_width = img_patch.shape[:2]
         if img_height < self.patch_size or img_width < self.patch_size:
             pad_height = self.patch_size - img_height
