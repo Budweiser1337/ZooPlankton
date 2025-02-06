@@ -158,41 +158,49 @@ def test(config):
 
     # Inference
     logging.info("= Running inference on the test set")
-    predictions = []
-    image_indices = []
-    patch_positions = []
+    reconstructed_images = {}  # Stores final full-sized predictions
+    normalization_map = {}  # Stores patch counts for averaging
+
+    patch_size = test_loader.dataset.patch_size
+    stride = patch_size // 2
 
     with torch.no_grad():
         for batch in tqdm(test_loader):
             images, row_starts, col_starts, img_indices = batch
             images = images.to(device)
 
-            # Forward pass
-            outputs = model(images)
-            outputs = (torch.sigmoid(outputs) >= model_config['threshold']).byte().cpu().numpy()
-            # Collect predictions
+            # Forward pass (keep raw logits)
+            outputs = model(images).cpu().numpy()
+
             for i in range(outputs.shape[0]):
-                predictions.append(outputs[i])
-                patch_positions.append((row_starts[i].item(), col_starts[i].item()))
-                image_indices.append(img_indices[i].item())
+                width, height = test_loader.dataset.image_sizes[img_idx]
+                img_idx = img_indices[i].item()
+                row_start = row_starts[i].item()
+                col_start = col_starts[i].item()
+                logit_patch = outputs[i][0]  # Extract 2D logits
 
-        logging.info("= Reconstructing full images from patches")
-        reconstructed_images = {}
-        for pred, (row_start, col_start), img_idx in zip(predictions, patch_positions, image_indices):
-            width, height = test_loader.dataset.image_sizes[img_idx]
-            if img_idx not in reconstructed_images:
-                reconstructed_images[img_idx] = np.zeros((height, width), dtype=np.float32)
+                if img_idx not in reconstructed_images:
+                    reconstructed_images[img_idx] = np.zeros((height, width), dtype=np.float32)
+                    normalization_map[img_idx] = np.zeros((height, width), dtype=np.float32)
 
-            patch_size = test_loader.dataset.patch_size
-            row_end = min(row_start + patch_size, height)
-            col_end = min(col_start + patch_size, width)
+                # Define patch end coordinates
+                row_end = min(row_start + patch_size, reconstructed_images[img_idx].shape[0])
+                col_end = min(col_start + patch_size, reconstructed_images[img_idx].shape[1])
 
-            valid_patch_height = row_end - row_start
-            valid_patch_width = col_end - col_start
-            
-            reconstructed_images[img_idx][row_start:row_end, col_start:col_end] = pred[0, :valid_patch_height, :valid_patch_width]
+                valid_patch_height = row_end - row_start
+                valid_patch_width = col_end - col_start
 
-        submission.generate_submission_file(list(reconstructed_images.values()), output_dir=config["prediction"]["dir"])
+                # Accumulate logits and count overlapping contributions
+                reconstructed_images[img_idx][row_start:row_end, col_start:col_end] += logit_patch[:valid_patch_height, :valid_patch_width]
+                normalization_map[img_idx][row_start:row_end, col_start:col_end] += 1
+
+    logging.info("= Finalizing predictions")
+    for img_idx in reconstructed_images:
+        reconstructed_images[img_idx] /= normalization_map[img_idx]  # Average overlapping regions
+        reconstructed_images[img_idx] = (torch.sigmoid(torch.tensor(reconstructed_images[img_idx])) >= model_config['threshold']).byte().numpy()
+
+    # Generate submission
+    submission.generate_submission_file(list(reconstructed_images.values()), output_dir=config["prediction"]["dir"])
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="%(message)s")

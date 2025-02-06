@@ -129,12 +129,15 @@ class PlanktonDataset(Dataset):
             with Image.open(scan_path) as img:
                 width, height = img.size
             self.image_sizes[img_idx] = (width, height)
-            num_patches_x = (width + patch_size - 1) // patch_size
-            num_patches_y = (height + patch_size - 1) // patch_size
+            stride = patch_size // 2
+            num_patches_x = (width + patch_size - 1) // stride + 1
+            num_patches_y = (height + patch_size - 1) // stride + 1
             
             for i in range(num_patches_y):
                 for j in range(num_patches_x):
-                    self.patches.append((img_idx, i, j))
+                    row_start = i * stride
+                    col_start = j * stride
+                    self.patches.append((img_idx, row_start, col_start))
     
     def __len__(self):
         return len(self.patches)
