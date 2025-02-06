@@ -21,9 +21,9 @@ date
 mkdir $TMPDIR/code
 rsync -r --exclude logs --exclude logslurms --exclude configs --include ".git/" . $TMPDIR/code
 
-echo "Checking out the correct version of the code commit_id 35e96d8fafb589f8d33e5f37ca58e8567f3035b4"
+echo "Checking out the correct version of the code commit_id 5c1c5e92965aededff623e2627c1e2d936237a92"
 cd $TMPDIR/code
-git checkout 35e96d8fafb589f8d33e5f37ca58e8567f3035b4
+git checkout 5c1c5e92965aededff623e2627c1e2d936237a92
 
 
 echo "Setting up the virtual environment"
@@ -36,7 +36,7 @@ python3 -m pip install .
 python3 -m pip install segmentation_models_pytorch
 
 echo "Training"
-python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmpysqv6c_y-config.yml train
+python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmpb35x2f45-config.yml train
 
 if [[ $? != 0 ]]; then
     exit -1
