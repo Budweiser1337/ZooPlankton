@@ -44,7 +44,7 @@ def train(config):
     logging.info("= Building the dataloaders")
     data_config = config["data"]
 
-    train_loader, valid_loader, input_size, num_classes = data.get_dataloaders(
+    train_loader_1, train_loader_2, valid_loader, input_size, num_classes = data.get_dataloaders(
         data_config, use_cuda
     )
 
@@ -79,7 +79,7 @@ def train(config):
         yaml.dump(config, file)
 
     # Make a summary script of the experiment
-    input_size = next(iter(train_loader))[0].shape
+    input_size = next(iter(train_loader_1))[0].shape + next(iter(train_loader_1))[0].shape
     summary_text = (
         f"Logdir : {logdir}\n"
         + "## Command \n"
@@ -92,7 +92,7 @@ def train(config):
         + "## Loss\n\n"
         + f"{loss}\n\n"
         + "## Datasets : \n"
-        + f"Train : {train_loader.dataset.dataset}\n"
+        + f"Train : {train_loader_1.dataset.dataset}\n"
         + f"Validation : {valid_loader.dataset.dataset}"
     )
     with open(logdir / "summary.txt", "w") as f:
@@ -107,12 +107,12 @@ def train(config):
     )
 
     for e in range(config["nepochs"]):
+        current_train_loader = train_loader_1 if e % 2 == 0 else train_loader_2
         # Train 1 epoch
-        train_loss, train_metrics = utils.train(model, train_loader, loss, optimizer, device)
+        train_loss, train_metrics = utils.train(model, current_train_loader, loss, optimizer, device, config)
 
         # Test
-        test_loss, test_metrics = utils.test(model, valid_loader, loss, device)
-
+        test_loss, test_metrics = utils.test(model, valid_loader, loss, device, config)
 
         updated = model_checkpoint.update(test_metrics["f1"])
         logging.info(
@@ -169,7 +169,7 @@ def test(config):
 
             # Forward pass
             outputs = model(images)
-            outputs = (torch.sigmoid(outputs) >= .6).byte().cpu().numpy()
+            outputs = (torch.sigmoid(outputs) >= model_config['threshold']).byte().cpu().numpy()
             # Collect predictions
             for i in range(outputs.shape[0]):
                 predictions.append(outputs[i])

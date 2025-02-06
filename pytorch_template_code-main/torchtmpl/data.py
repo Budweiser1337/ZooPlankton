@@ -31,8 +31,9 @@ def get_dataloaders(data_config, use_cuda):
 
     input_transform = transforms.Compose([
         transforms.ToTensor(),
-        # transforms.RandomHorizontalFlip(p=0.5),
-        # transforms.RandomVerticalFlip(p=0.5)
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomVerticalFlip(p=0.5),
+        transforms.RandomRotation(45)
     ])
     base_dataset = PlanktonDataset.PlanktonDataset(
         dir=data_config["trainpath"],
@@ -52,9 +53,21 @@ def get_dataloaders(data_config, use_cuda):
     train_dataset = torch.utils.data.Subset(base_dataset, train_indices)
     valid_dataset = torch.utils.data.Subset(base_dataset, valid_indices)
 
+    half_size = len(train_dataset) // 2
+    train_indices_1 = train_indices[:half_size]
+    train_indices_2 = train_indices[half_size:]
+
     # Build the dataloaders
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset,
+    train_loader_1 = torch.utils.data.DataLoader(
+        torch.utils.data.Subset(train_dataset, train_indices_1),
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers,
+        pin_memory=use_cuda,
+    )
+
+    train_loader_2 = torch.utils.data.DataLoader(
+        torch.utils.data.Subset(train_dataset, train_indices_2),
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
@@ -72,7 +85,7 @@ def get_dataloaders(data_config, use_cuda):
     num_classes = 2
     input_size = tuple(base_dataset[0][0].shape)
 
-    return train_loader, valid_loader, input_size, num_classes
+    return train_loader_1, train_loader_2, valid_loader, input_size, num_classes
 
 def get_test_dataloaders(data_config, use_cuda):
     num_workers = data_config["num_workers"]

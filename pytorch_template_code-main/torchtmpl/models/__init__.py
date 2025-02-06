@@ -35,7 +35,7 @@ def build_model(cfg, input_size, num_classes):
             encoder_name="resnet152",
             encoder_weights="imagenet",
             classes=1,
-            activation="sigmoid",
+            activation=None, # Use raw logits (for BCE/Focal/Dice loss)
             in_channels=1,
         )
         return model

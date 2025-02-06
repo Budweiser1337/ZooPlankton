@@ -63,7 +63,7 @@ class ModelCheckpoint(object):
         return False
 
 
-def train(model, loader, f_loss, optimizer, device, dynamic_display=True):
+def train(model, loader, f_loss, optimizer, device, config, dynamic_display=True):
     """
     Train a model for one epoch, iterating over the loader
     using the f_loss to compute the loss and the optimizer
@@ -105,7 +105,7 @@ def train(model, loader, f_loss, optimizer, device, dynamic_display=True):
 
         # Update the metrics
         # We here consider the loss is batch normalized
-        train_metrics = metrics.compute_metrics(y_true=targets, y_pred=(torch.sigmoid(outputs) > .6).int())
+        train_metrics = metrics.compute_metrics(y_true=targets, y_pred=(torch.sigmoid(outputs) > config['model']['threshold']).int())
         for k in total_metrics:
             total_metrics[k] += inputs.shape[0] * train_metrics[k]
         total_loss += inputs.shape[0] * loss.item()
@@ -115,7 +115,7 @@ def train(model, loader, f_loss, optimizer, device, dynamic_display=True):
     return total_loss / num_samples, {k: v / num_samples for k, v in total_metrics.items()}
 
 
-def test(model, loader, f_loss, device):
+def test(model, loader, f_loss, device, config):
     """
     Test a model over the loader
     using the f_loss as metrics
@@ -150,7 +150,7 @@ def test(model, loader, f_loss, device):
         # Update the metrics
         # We here consider the loss is batch normalized
         total_loss += inputs.shape[0] * loss.item()
-        test_metrics = metrics.compute_metrics(y_true=targets, y_pred=(torch.sigmoid(outputs) > .6).int())
+        test_metrics = metrics.compute_metrics(y_true=targets, y_pred=(torch.sigmoid(outputs) > config['model']['threshold']).int())
         for k in total_metrics:
             total_metrics[k] += inputs.shape[0] * test_metrics[k]
         num_samples += inputs.shape[0]
