@@ -34,7 +34,7 @@ def build_model(cfg, input_size, num_classes):
         model = smp.Segformer(
             encoder_name="resnet152",
             encoder_weights="imagenet",
-            classes=2,
+            classes=1,
             activation="sigmoid",
             in_channels=1,
         )
