@@ -146,8 +146,8 @@ class PlanktonDataset(Dataset):
         
         img_idx, patch_i, patch_j = self.patches[idx]
         
-        row_start = patch_i * self.patch_size
-        col_start = patch_j * self.patch_size
+        row_start = patch_i
+        col_start = patch_j
         img_patch = extract_patch_from_ppm(self.scan_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
         
         if self.train:
