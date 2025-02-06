@@ -169,7 +169,7 @@ def test(config):
 
             # Forward pass
             outputs = model(images)
-            outputs = (torch.sigmoid(outputs) > .5).byte().cpu().numpy()
+            outputs = (torch.sigmoid(outputs) >= .6).byte().cpu().numpy()
             # Collect predictions
             for i in range(outputs.shape[0]):
                 predictions.append(outputs[i])

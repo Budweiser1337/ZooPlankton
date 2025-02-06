@@ -16,6 +16,12 @@ def get_loss(lossname, config):
         alpha = config["loss"]["params"]["alpha"]
         gamma = config["loss"]["params"]["gamma"]
         return lossf.FocalLoss(alpha=alpha, gamma=gamma)
+    elif lossname == "DiceFocalLoss":
+        alpha = config["loss"]["params"]["alpha"]
+        gamma = config["loss"]["params"]["gamma"]
+        dice_weight = config["loss"]["params"]["dice_weight"]
+        focal_weight = config["loss"]["params"]["focal_weight"]
+        return lossf.DiceFocalLoss(alpha=alpha, gamma=gamma, dice_weight=dice_weight, focal_weight=focal_weight)
     return eval(f"nn.{config['loss']}()")
 
 

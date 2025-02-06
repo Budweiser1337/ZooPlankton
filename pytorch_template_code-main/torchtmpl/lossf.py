@@ -19,8 +19,14 @@ class FocalLoss(nn.Module):
         # Calculate p_t
         p_t = targets * inputs + (1 - targets) * (1 - inputs)
         
-        # Calculate the Focal Loss components
-        loss = self.alpha * (1 - p_t) ** self.gamma * BCE_loss
+        focal_weight = (1 - p_t) ** self.gamma
+
+        if self.alpha is not None:
+            alpha_factor = targets * self.alpha[1] + (1 - targets) * self.alpha[0]
+            focal_weight = alpha_factor * focal_weight
+
+        # Apply focal weight to loss
+        loss = focal_weight * BCE_loss
         
         # Apply reduction method
         if self.reduction == 'mean':
@@ -29,3 +35,35 @@ class FocalLoss(nn.Module):
             return loss.sum()
         else:
             return loss  # Return per-element loss if no reduction
+
+class DiceLoss(nn.Module):
+    def __init__(self, smooth=1e-6):
+        super(DiceLoss, self).__init__()
+        self.smooth = smooth
+
+    def forward(self, inputs, targets):
+        # Apply sigmoid to logits
+        inputs = torch.sigmoid(inputs)
+
+        # Flatten tensors
+        inputs = inputs.view(-1)
+        targets = targets.view(-1)
+
+        # Compute Dice coefficient
+        intersection = (inputs * targets).sum()
+        dice = (2. * intersection + self.smooth) / (inputs.sum() + targets.sum() + self.smooth)
+
+        return 1 - dice
+
+class DiceFocalLoss(nn.Module):
+    def __init__(self, alpha, gamma, dice_weight, focal_weight):
+        super(DiceFocalLoss, self).__init__()
+        self.dice_weight = dice_weight
+        self.focal_weight = focal_weight
+        self.dice_loss = DiceLoss()
+        self.focal_loss = FocalLoss(alpha, gamma)
+
+    def forward(self, inputs, targets):
+        dice = self.dice_loss(inputs, targets)
+        focal = self.focal_loss(inputs, targets)
+        return self.dice_weight * dice + self.focal_weight * focal

@@ -105,7 +105,7 @@ def train(model, loader, f_loss, optimizer, device, dynamic_display=True):
 
         # Update the metrics
         # We here consider the loss is batch normalized
-        train_metrics = metrics.compute_metrics(y_true=targets, y_pred=(torch.sigmoid(outputs) > .5).int())
+        train_metrics = metrics.compute_metrics(y_true=targets, y_pred=(torch.sigmoid(outputs) > .6).int())
         for k in total_metrics:
             total_metrics[k] += inputs.shape[0] * train_metrics[k]
         total_loss += inputs.shape[0] * loss.item()
@@ -150,7 +150,7 @@ def test(model, loader, f_loss, device):
         # Update the metrics
         # We here consider the loss is batch normalized
         total_loss += inputs.shape[0] * loss.item()
-        test_metrics = metrics.compute_metrics(y_true=targets, y_pred=(torch.sigmoid(outputs) > .5).int())
+        test_metrics = metrics.compute_metrics(y_true=targets, y_pred=(torch.sigmoid(outputs) > .6).int())
         for k in total_metrics:
             total_metrics[k] += inputs.shape[0] * test_metrics[k]
         num_samples += inputs.shape[0]
