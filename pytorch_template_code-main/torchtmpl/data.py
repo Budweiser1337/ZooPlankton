@@ -53,7 +53,7 @@ def get_dataloaders(data_config, use_cuda):
     train_dataset = torch.utils.data.Subset(base_dataset, train_indices)
     valid_dataset = torch.utils.data.Subset(base_dataset, valid_indices)
 
-    half_size = len(train_dataset) // 2
+    half_size = len(train_indices) // 2
     train_indices_1 = train_indices[:half_size]
     train_indices_2 = train_indices[half_size:]
 
