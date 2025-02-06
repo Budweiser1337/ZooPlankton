@@ -31,7 +31,7 @@ def build_model(cfg, input_size, num_classes):
     
     elif cfg['class'] == "SegFormer":
         # Load SegFormer model for semantic segmentation
-        model = smp.SegFormer(
+        model = smp.Segformer(
             encoder_name="resnest152",
             encoder_weights="imagenet",
             classes=2,
