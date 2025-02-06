@@ -79,7 +79,7 @@ def train(config):
         yaml.dump(config, file)
 
     # Make a summary script of the experiment
-    input_size = next(iter(train_loader_1))[0].shape + next(iter(train_loader_1))[0].shape
+    input_size = next(iter(train_loader_1))[0].shape
     summary_text = (
         f"Logdir : {logdir}\n"
         + "## Command \n"
