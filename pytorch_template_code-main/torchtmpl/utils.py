@@ -94,7 +94,7 @@ def train(model, loader, f_loss, optimizer, device, config, dynamic_display=True
 
         inputs, targets = inputs.to(device), targets.to(device)
         
-        with autocast(dtype=torch.float16):
+        with autocast("cuda", dtype=torch.float16):
             # Compute the forward propagation
             outputs = model(inputs)
             #outputs = torch.sigmoid(outputs['out'])
@@ -112,7 +112,7 @@ def train(model, loader, f_loss, optimizer, device, config, dynamic_display=True
             total_metrics[k] += inputs.shape[0] * train_metrics[k]
         total_loss += inputs.shape[0] * loss.item()
         num_samples += inputs.shape[0]
-        pbar.set_description(f"Train loss : {total_loss/num_samples:.2f}, F1 score : {total_metrics['f1']/num_samples}")
+        pbar.set_description(f"Train loss : {total_loss/num_samples:.2f}, F1-score : {total_metrics['f1']/num_samples:.5f}")
         
     return total_loss / num_samples, {k: v / num_samples for k, v in total_metrics.items()}
 
