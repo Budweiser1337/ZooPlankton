@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --exclude=sh00,sh[10-19]
 #SBATCH --partition=gpu_prod_long
-#SBATCH --time=24:00:00
+#SBATCH --time=36:00:00
 #SBATCH --output=logslurms/slurm-%A_%a.out
 #SBATCH --error=logslurms/slurm-%A_%a.err
 #SBATCH --array=1-1
@@ -21,9 +21,9 @@ date
 mkdir $TMPDIR/code
 rsync -r --exclude logs --exclude logslurms --exclude configs --include ".git/" . $TMPDIR/code
 
-echo "Checking out the correct version of the code commit_id 617519edfa85916fdb23bb59fa63da4f879fb79a"
+echo "Checking out the correct version of the code commit_id 52ed9b0b5b24af2962717ea3db6618baf47cde0a"
 cd $TMPDIR/code
-git checkout 617519edfa85916fdb23bb59fa63da4f879fb79a
+git checkout 52ed9b0b5b24af2962717ea3db6618baf47cde0a
 
 
 echo "Setting up the virtual environment"
@@ -36,7 +36,7 @@ python3 -m pip install .
 python3 -m pip install segmentation_models_pytorch
 
 echo "Training"
-python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmpm_o97lnp-config.yml train
+python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmpnzqurnph-config.yml train
 
 if [[ $? != 0 ]]; then
     exit -1
