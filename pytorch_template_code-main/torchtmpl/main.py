@@ -157,7 +157,7 @@ def test(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, 1, 1)
-    model.load_state_dict(torch.load("model_logs/UnetPlus_3/model.pt"))
+    model.load_state_dict(torch.load("model_logs/UnetPlus_3/best_model.pt"))
     model.to(device)
 
     # Inference
@@ -188,7 +188,7 @@ def test(config):
                 col_start = col_starts[i].item()
                 logit_patch = outputs[i][0]  # Extract 2D logits
                 width, height = test_loader.dataset.image_sizes[img_idx]
-                
+
                 if img_idx not in reconstructed_images:
                     reconstructed_images[img_idx] = np.zeros((height, width), dtype=np.float32)
                     normalization_map[img_idx] = np.zeros((height, width), dtype=np.float32)
@@ -204,7 +204,7 @@ def test(config):
                 reconstructed_images[img_idx][row_start:row_end, col_start:col_end] += logit_patch[:valid_patch_height, :valid_patch_width]
                 normalization_map[img_idx][row_start:row_end, col_start:col_end] += 1
 
-    logging.info("= Finalizing predictions")
+    logging.info("= Generating submission file")
     for img_idx in reconstructed_images:
         reconstructed_images[img_idx] /= normalization_map[img_idx]  # Average overlapping regions
         reconstructed_images[img_idx] = (torch.sigmoid(torch.tensor(reconstructed_images[img_idx])) >= model_config['threshold']).byte().numpy()

@@ -22,7 +22,7 @@ def array_to_string(arr: np.array, num_bits=6, offset=48):
     return result
 
 def generate_submission_file(predictions, output_dir):
-    mask_names = ["rg20090121_scan.png.ppm", "rg20090520_scan.png.ppm"]
+    mask_names = ["rg20090520_scan.png.ppm", "rg20090121_scan.png.ppm"]
     with open(f"{output_dir}/submission.csv", "w") as f:
         f.write("Id,Target\n")
 
