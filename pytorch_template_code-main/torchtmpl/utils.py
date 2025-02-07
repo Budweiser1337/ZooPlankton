@@ -9,8 +9,6 @@ import torch.nn
 import tqdm
 import metrics
 import matplotlib.pyplot as plt
-from torch.cuda.amp import autocast
-
 
 def generate_unique_logpath(logdir, raw_run_name):
     """
@@ -94,7 +92,7 @@ def train(model, loader, f_loss, optimizer, device, config, dynamic_display=True
 
         inputs, targets = inputs.to(device), targets.to(device)
         
-        with autocast(device_type="cuda", dtype=torch.float16):
+        with torch.autocast(device_type="cuda", dtype=torch.float16):
             # Compute the forward propagation
             outputs = model(inputs)
             #outputs = torch.sigmoid(outputs['out'])
