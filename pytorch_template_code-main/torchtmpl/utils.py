@@ -99,11 +99,11 @@ def train(model, loader, f_loss, optimizer, device, config, dynamic_display=True
             loss = f_loss(outputs, targets)
 
         # Backward and optimize
-        optimizer.zero_grad()
+        optimizer.zero_grad(set_to_none=True)
         scaler.scale(loss).backward()
         optimizer.step()
         scaler.update()
-        
+                
         # Update the metrics
         # We here consider the loss is batch normalized
         train_metrics = metrics.compute_metrics(y_true=targets, y_pred=(torch.sigmoid(outputs) > config['model']['threshold']).int())
