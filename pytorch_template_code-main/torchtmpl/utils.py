@@ -94,7 +94,7 @@ def train(model, loader, f_loss, optimizer, device, config, dynamic_display=True
 
         inputs, targets = inputs.to(device), targets.to(device)
         
-        with autocast("cuda", dtype=torch.float16):
+        with autocast("cuda", True, dtype=torch.float16):
             # Compute the forward propagation
             outputs = model(inputs)
             #outputs = torch.sigmoid(outputs['out'])
