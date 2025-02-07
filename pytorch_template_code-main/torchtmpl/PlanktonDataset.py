@@ -3,9 +3,6 @@ import os
 import torch
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
-from PIL import Image
-
-Image.MAX_IMAGE_PIXELS = None
 
 def show_plankton_image(img, mask):
     """
@@ -101,6 +98,37 @@ def extract_patch_from_ppm(ppm_path, row_idx, col_idx, patch_size):
 
     return patch
 
+def get_size(ppm_path):
+    with open(ppm_path, "rb") as f:
+        # Skip the PPM magic number
+        f.readline()
+        # Skip the PPM comment
+        while True:
+            line = f.readline().decode("utf-8")
+            if not line.startswith("#"):
+                break
+        ncols, nrows = map(int, line.split())
+        maxval = int(f.readline().decode("utf-8"))
+        
+        # Maxval is either lower than 256 or 65536
+        # It is actually 255 for the scans, and 65536 for the masks
+        # This maximal value impacts the number of bytes used for encoding the pixels' value
+        if maxval == 255:
+            nbytes_per_pixel = 1
+            dtype = np.uint8
+        elif maxval == 65535:
+            nbytes_per_pixel = 2
+            dtype = np.dtype("uint16").newbyteorder(">")
+        else:
+            raise ValueError(f"Unsupported maxval {maxval}")
+
+        first_pixel_offset = f.tell()
+        f.seek(0, 2)   # Seek to the end of the file
+        data_size = f.tell() - first_pixel_offset
+        assert data_size == (ncols * nrows * nbytes_per_pixel)
+    
+    return nrows, ncols
+
 class PlanktonDataset(Dataset):
     def __init__(self, dir, patch_size, train=True, transform = None):
         self.dir = dir
@@ -126,8 +154,7 @@ class PlanktonDataset(Dataset):
                     self.mask_files.append(mask_path)
         
         for img_idx, scan_path in enumerate(self.scan_files):
-            with Image.open(scan_path) as img:
-                width, height = img.size
+            height, width = get_size(scan_path)
             self.image_sizes[img_idx] = (width, height)
             # stride = patch_size // 2
             # num_patches_x = (width + patch_size - 1) // stride + 1
