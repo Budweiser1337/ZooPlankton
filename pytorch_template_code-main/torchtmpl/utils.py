@@ -80,7 +80,7 @@ def train(model, loader, f_loss, optimizer, device, config, dynamic_display=True
     # We enter train mode.
     # This is important for layers such as dropout, batchnorm, ...
     model.train()
-
+    scaler = torch.GradScaler()
     total_loss = 0
     total_metrics = {
         "precision": 0,
@@ -100,9 +100,10 @@ def train(model, loader, f_loss, optimizer, device, config, dynamic_display=True
 
         # Backward and optimize
         optimizer.zero_grad()
-        loss.backward()
+        scaler.scale(loss).backward()
         optimizer.step()
-
+        scaler.update()
+        
         # Update the metrics
         # We here consider the loss is batch normalized
         train_metrics = metrics.compute_metrics(y_true=targets, y_pred=(torch.sigmoid(outputs) > config['model']['threshold']).int())
