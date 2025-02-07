@@ -96,7 +96,7 @@ def train(model, loader, f_loss, optimizer, device, config, dynamic_display=True
             # Compute the forward propagation
             outputs = model(inputs)
             #outputs = torch.sigmoid(outputs['out'])
-            loss = f_loss(outputs, targets.float())
+            loss = f_loss(outputs, targets)
 
         # Backward and optimize
         optimizer.zero_grad()

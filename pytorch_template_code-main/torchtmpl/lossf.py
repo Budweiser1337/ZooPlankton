@@ -37,7 +37,7 @@ class FocalLoss(nn.Module):
             return loss  # Return per-element loss if no reduction
 
 class DiceLoss(nn.Module):
-    def __init__(self, smooth=1e-6):
+    def __init__(self, smooth=1e-5):
         super(DiceLoss, self).__init__()
         self.smooth = smooth
 
