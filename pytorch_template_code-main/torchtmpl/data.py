@@ -37,8 +37,9 @@ def get_dataloaders(data_config, use_cuda):
     ])
     base_dataset = PlanktonDataset.PlanktonDataset(
         dir=data_config["trainpath"],
+        patch_size=data_config["patch_size"],
+        stride=data_config["stride"],
         train=True,
-        patch_size=256,
         transform=input_transform,
     )
 
