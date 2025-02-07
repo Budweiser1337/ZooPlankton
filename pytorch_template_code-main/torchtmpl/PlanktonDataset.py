@@ -173,7 +173,7 @@ class PlanktonDataset(Dataset):
         return len(self.patches)
     
     def __getitem__(self, idx):
-        img_idx = idx // ((self.image_sizes[img_idx][1] // self.stride) * (self.image_sizes[img_idx][0] // self.stride))
+        img_idx, _, _ = self.patches[idx]
         row_start = (idx // (self.image_sizes[img_idx][0] // self.stride)) % (self.image_sizes[img_idx][1] // self.stride)
         col_start = idx % (self.image_sizes[img_idx][0] // self.stride)
         
