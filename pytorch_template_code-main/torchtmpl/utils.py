@@ -101,7 +101,7 @@ def train(model, loader, f_loss, optimizer, device, config, dynamic_display=True
         # Backward and optimize
         optimizer.zero_grad(set_to_none=True)
         scaler.scale(loss).backward()
-        optimizer.step()
+        scaler.step(optimizer)
         scaler.update()
                 
         # Update the metrics
