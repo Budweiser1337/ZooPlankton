@@ -185,7 +185,7 @@ class PlanktonDataset(Dataset):
         if self.train:
             mask_patch = extract_patch_from_ppm(self.mask_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
             mask_patch = mask_patch.astype(np.uint8)
-            mask_patch = np.where(mask_patch < 8., 0., 1.).astype(np.float32)
+            mask_patch = np.where(mask_patch < 8., 0., 1.).astype(np.float16)
             if mask_patch.dtype.byteorder not in ('=', '|'):
                 mask_patch = mask_patch.astype(mask_patch.dtype.newbyteorder('='))
             
