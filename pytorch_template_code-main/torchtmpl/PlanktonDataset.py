@@ -157,27 +157,30 @@ class PlanktonDataset(Dataset):
         for img_idx, scan_path in enumerate(self.scan_files):
             height, width = get_size(scan_path)
             self.image_sizes[img_idx] = (width, height)
-            num_patches_x = (width + patch_size - 1) // self.stride
-            num_patches_y = (height + patch_size - 1) // self.stride
-            # num_patches_x = (width + patch_size - 1) // self.patch_size
-            # num_patches_y = (height + patch_size - 1) // self.patch_size
+            # num_patches_x = (width + self.patch_size - 1) // self.stride
+            # num_patches_y = (height + self.patch_size - 1) // self.stride
+            # # num_patches_x = (width + self.patch_size - 1) // self.patch_size
+            # # num_patches_y = (height + self.patch_size - 1) // self.patch_size
             
-            for i in range(num_patches_y):
-                for j in range(num_patches_x):
-                    row_start = i * stride
-                    col_start = j * stride
-                    self.patches.append((img_idx, row_start, col_start))
-                    # self.patches.append((img_idx, i, j))
+            # for i in range(num_patches_y):
+            #     for j in range(num_patches_x):
+            #         row_start = i * stride
+            #         col_start = j * stride
+            #         self.patches.append((img_idx, row_start, col_start))
+            #         # self.patches.append((img_idx, i, j))
     
     def __len__(self):
         return len(self.patches)
     
     def __getitem__(self, idx):
+        img_idx = idx // ((self.image_sizes[img_idx][1] // self.stride) * (self.image_sizes[img_idx][0] // self.stride))
+        row_start = (idx // (self.image_sizes[img_idx][0] // self.stride)) % (self.image_sizes[img_idx][1] // self.stride)
+        col_start = idx % (self.image_sizes[img_idx][0] // self.stride)
         
-        img_idx, patch_i, patch_j = self.patches[idx]
+        # img_idx, patch_i, patch_j = self.patches[idx]
         
-        row_start = max(0, min(patch_i, self.image_sizes[img_idx][1] - self.patch_size))
-        col_start = max(0, min(patch_j, self.image_sizes[img_idx][0] - self.patch_size))
+        # row_start = max(0, min(patch_i, self.image_sizes[img_idx][1] - self.patch_size))
+        # col_start = max(0, min(patch_j, self.image_sizes[img_idx][0] - self.patch_size))
         # row_start = patch_i * self.patch_size
         # col_start = patch_j * self.patch_size
         img_patch = extract_patch_from_ppm(self.scan_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
