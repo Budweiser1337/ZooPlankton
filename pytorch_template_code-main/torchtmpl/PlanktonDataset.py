@@ -176,8 +176,8 @@ class PlanktonDataset(Dataset):
         
         img_idx, patch_i, patch_j = self.patches[idx]
         
-        row_start = max(0, min(patch_i, self.image_sizes[img_idx][1] - self.patch_size))
-        col_start = max(0, min(patch_j, self.image_sizes[img_idx][0] - self.patch_size))
+        row_start = patch_i
+        col_start = patch_j
         # row_start = patch_i * self.patch_size
         # col_start = patch_j * self.patch_size
         img_patch = extract_patch_from_ppm(self.scan_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
