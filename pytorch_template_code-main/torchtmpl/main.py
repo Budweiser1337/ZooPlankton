@@ -44,9 +44,9 @@ def train(config):
     logging.info("= Building the dataloaders")
     data_config = config["data"]
 
-    train_loader_1, train_loader_2, valid_loader, input_size, num_classes = data.get_dataloaders(
-        data_config, use_cuda
-    )
+    # train_loader_1, train_loader_2, valid_loader, input_size, num_classes = data.get_dataloaders(
+    #     data_config, use_cuda
+    # )
     train_loader, valid_loader, input_size, num_classes = data.get_dataloaders(
         data_config, use_cuda
     )
