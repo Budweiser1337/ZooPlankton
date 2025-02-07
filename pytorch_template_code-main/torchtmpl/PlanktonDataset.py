@@ -157,33 +157,26 @@ class PlanktonDataset(Dataset):
         for img_idx, scan_path in enumerate(self.scan_files):
             height, width = get_size(scan_path)
             self.image_sizes[img_idx] = (width, height)
-            self.total_patches = sum(
-                ((height - self.patch_size) // self.stride + 1) *
-                ((width - self.patch_size) // self.stride + 1)
-                for height, width in self.image_sizes.values()
-            )
-            # num_patches_x = (width + self.patch_size - 1) // self.stride
-            # num_patches_y = (height + self.patch_size - 1) // self.stride
-            # # num_patches_x = (width + self.patch_size - 1) // self.patch_size
-            # # num_patches_y = (height + self.patch_size - 1) // self.patch_size
+            num_patches_x = (width + self.patch_size - 1) // self.stride
+            num_patches_y = (height + self.patch_size - 1) // self.stride
+            # num_patches_x = (width + self.patch_size - 1) // self.patch_size
+            # num_patches_y = (height + self.patch_size - 1) // self.patch_size
             
-            # for i in range(num_patches_y):
-            #     for j in range(num_patches_x):
-            #         row_start = i * stride
-            #         col_start = j * stride
-            #         self.patches.append((img_idx, row_start, col_start))
-            #         # self.patches.append((img_idx, i, j))
+            for i in range(num_patches_y):
+                for j in range(num_patches_x):
+                    row_start = i * stride
+                    col_start = j * stride
+                    self.patches.append((img_idx, row_start, col_start))
+                    # self.patches.append((img_idx, i, j))
     
     def __len__(self):
-        return self.total_patches
+        return len(self.patches)
     
     def __getitem__(self, idx):
-        img_idx, row_start, col_start = self._get_patch_indices(idx)
-        img_patch = extract_patch_from_ppm(self.scan_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
-        # img_idx, patch_i, patch_j = self.patches[idx]
+        img_idx, patch_i, patch_j = self.patches[idx]
         
-        # row_start = patch_i
-        # col_start = patch_j
+        row_start = max(0, min(patch_i, self.image_sizes[img_idx][1] - self.patch_size))
+        col_start = max(0, min(patch_j, self.image_sizes[img_idx][0] - self.patch_size))
         # row_start = patch_i * self.patch_size
         # col_start = patch_j * self.patch_size
         img_patch = extract_patch_from_ppm(self.scan_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
@@ -212,18 +205,3 @@ class PlanktonDataset(Dataset):
             return img_patch/255., row_start, col_start, img_idx
         
         return img_patch/255., mask_patch
-    
-    def _get_patch_indices(self, idx):
-        for img_idx, (height, width) in self.image_sizes.items():
-            num_patches_y = (height - self.patch_size) // self.stride + 1
-            num_patches_x = (width - self.patch_size) // self.stride + 1
-            num_patches_img = num_patches_y * num_patches_x
-            
-            if idx < num_patches_img:
-                row_idx = idx // num_patches_x
-                col_idx = idx % num_patches_x
-                return img_idx, row_idx * self.stride, col_idx * self.stride
-            
-            idx -= num_patches_img
-        
-        raise IndexError("Index hors limites")
