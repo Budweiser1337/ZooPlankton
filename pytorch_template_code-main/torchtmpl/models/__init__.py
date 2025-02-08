@@ -46,7 +46,8 @@ def build_model(cfg, input_size, num_classes):
             encoder_weights="imagenet",
             in_channels=1,
             classes=1,
-            activation=None  # Use raw logits (for BCE/Focal/Dice loss)
+            activation=None,  # Use raw logits (for BCE/Focal/Dice loss)
+            decoder_attention_type="scse"
         )
         return model
     
