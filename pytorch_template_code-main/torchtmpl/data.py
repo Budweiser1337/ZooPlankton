@@ -31,9 +31,9 @@ def get_dataloaders(data_config, use_cuda):
 
     input_transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomVerticalFlip(p=0.5),
-        transforms.RandomRotation(45)
+        # transforms.RandomHorizontalFlip(p=0.5),
+        # transforms.RandomVerticalFlip(p=0.5),
+        # transforms.RandomRotation(45)
     ])
     base_dataset = PlanktonDataset.PlanktonDataset(
         dir=data_config["trainpath"],
