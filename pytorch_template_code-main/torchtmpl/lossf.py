@@ -56,7 +56,7 @@ class DiceLoss(nn.Module):
         return 1 - dice
 
 class DiceFocalLoss(nn.Module):
-    def __init__(self, alpha, gamma, dice_weight, focal_weight, boundary_weight):
+    def __init__(self, alpha, gamma, dice_weight, focal_weight):
         super(DiceFocalLoss, self).__init__()
         self.dice_weight = dice_weight
         self.focal_weight = focal_weight
