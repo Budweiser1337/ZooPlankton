@@ -15,7 +15,7 @@ def f1_score(y_true, y_pred):
     denominator = (y_true.sum() + y_pred.sum())
     return numerator/denominator if denominator>0 else torch.tensor(0.0)
 
-def compute_metrics(y_pred, y_true):
+def compute_metrics(y_true, y_pred):
     return {
         "precision": precision(y_true=y_true, y_pred=y_pred).item(),
         "recall": recall(y_true=y_true, y_pred=y_pred).item(),

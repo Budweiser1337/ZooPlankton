@@ -98,13 +98,11 @@ def train(model, loader, f_loss, optimizer, device, config, dynamic_display=True
             #outputs = torch.sigmoid(outputs['out'])
             loss = f_loss(outputs, targets)
 
-        loss = loss / 5
+        # Backward and optimize
+        optimizer.zero_grad(set_to_none=True)
         scaler.scale(loss).backward()
-        
-        if (i + 1) % 5 == 0:
-            scaler.step(optimizer)
-            scaler.update()
-            optimizer.zero_grad(set_to_none=True)
+        scaler.step(optimizer)
+        scaler.update()
                 
         # Update the metrics
         # We here consider the loss is batch normalized
