@@ -44,9 +44,6 @@ def train(config):
     logging.info("= Building the dataloaders")
     data_config = config["data"]
 
-    # train_loader_1, train_loader_2, valid_loader, input_size, num_classes = data.get_dataloaders(
-    #     data_config, use_cuda
-    # )
     train_loader, valid_loader, input_size, num_classes = data.get_dataloaders(
         data_config, use_cuda
     )
@@ -137,6 +134,14 @@ def train(config):
             logging.info("Logging on wandb")
             wandb_log(metrics)
 
+def gaussian_kernel(size, sigma):
+    """Generate a 2D Gaussian kernel for soft blending"""
+    kernel = np.fromfunction(
+        lambda x, y: (1 / (2 * np.pi * sigma ** 2)) * np.exp(- ((x - size // 2) ** 2 + (y - size // 2) ** 2) / (2 * sigma ** 2)),
+        (size, size)
+    )
+    return kernel / np.sum(kernel)
+
 def test(config):
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda") if use_cuda else torch.device("cpu")
@@ -166,10 +171,7 @@ def test(config):
     normalization_map = {}  # Stores patch counts for averaging
 
     patch_size = test_loader.dataset.patch_size
-    
-    # predictions = []
-    # image_indices = []
-    # patch_positions = []
+    gaussian = gaussian_kernel(patch_size, sigma=64.)
 
     with torch.no_grad():
         for batch in tqdm(test_loader):
@@ -178,9 +180,6 @@ def test(config):
 
             # Forward pass (keep raw logits)
             outputs = model(images).cpu().numpy()
-            
-            # outputs = model(images)
-            # outputs = (torch.sigmoid(outputs) >= model_config['threshold']).byte().cpu().numpy()
 
             for i in range(outputs.shape[0]):
                 img_idx = img_indices[i].item()
@@ -201,34 +200,14 @@ def test(config):
                 valid_patch_width = col_end - col_start
 
                 # Accumulate logits and count overlapping contributions
-                reconstructed_images[img_idx][row_start:row_end, col_start:col_end] += logit_patch[:valid_patch_height, :valid_patch_width]
-                normalization_map[img_idx][row_start:row_end, col_start:col_end] += 1
+                weight_patch = gaussian[:valid_patch_height, :valid_patch_width]
+                reconstructed_images[img_idx][row_start:row_end, col_start:col_end] += logit_patch[:valid_patch_height, :valid_patch_width] * weight_patch
+                normalization_map[img_idx][row_start:row_end, col_start:col_end] += weight_patch
 
     logging.info("= Generating submission file")
     for img_idx in reconstructed_images:
         reconstructed_images[img_idx] /= normalization_map[img_idx]  # Average overlapping regions
         reconstructed_images[img_idx] = (torch.sigmoid(torch.tensor(reconstructed_images[img_idx])) >= model_config['threshold']).byte().numpy()
-            # Collect predictions
-        #     for i in range(outputs.shape[0]):
-        #         predictions.append(outputs[i])
-        #         patch_positions.append((row_starts[i].item(), col_starts[i].item()))
-        #         image_indices.append(img_indices[i].item())
-
-        # logging.info("= Reconstructing full images from patches")
-        # reconstructed_images = {}
-        # for pred, (row_start, col_start), img_idx in zip(predictions, patch_positions, image_indices):
-        #     width, height = test_loader.dataset.image_sizes[img_idx]
-        #     if img_idx not in reconstructed_images:
-        #         reconstructed_images[img_idx] = np.zeros((height, width), dtype=np.float32)
-
-        #     patch_size = test_loader.dataset.patch_size
-        #     row_end = min(row_start + patch_size, height)
-        #     col_end = min(col_start + patch_size, width)
-
-        #     valid_patch_height = row_end - row_start
-        #     valid_patch_width = col_end - col_start
-            
-        #     reconstructed_images[img_idx][row_start:row_end, col_start:col_end] = pred[0, :valid_patch_height, :valid_patch_width]
 
     # Generate submission
     submission.generate_submission_file(list(reconstructed_images.values()), output_dir=config["prediction"]["dir"])

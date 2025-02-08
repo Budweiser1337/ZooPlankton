@@ -31,16 +31,16 @@ def get_dataloaders(data_config, use_cuda):
 
     input_transform = transforms.Compose([
         transforms.ToTensor(),
-        # transforms.RandomHorizontalFlip(p=0.5),
-        # transforms.RandomVerticalFlip(p=0.5),
-        # transforms.RandomRotation(45)
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomVerticalFlip(p=0.5),
+        transforms.RandomRotation(45)
     ])
     base_dataset = PlanktonDataset.PlanktonDataset(
         dir=data_config["trainpath"],
         patch_size=data_config["patch_size"],
         stride=data_config["stride"],
         train=True,
-        transform=input_transform,
+        transform=PlanktonDataset.TransformWithMask(input_transform),
     )
 
     logging.info(f"  - I loaded {len(base_dataset)} samples")

@@ -183,7 +183,7 @@ class PlanktonDataset(Dataset):
         
         if self.train:
             mask_patch = extract_patch_from_ppm(self.mask_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
-            mask_patch = np.where(mask_patch < 8, 0, 1).astype(np.float32)
+            mask_patch = np.where(mask_patch < 8, 0, 1)
             if mask_patch.dtype.byteorder not in ('=', '|'):
                 mask_patch = mask_patch.astype(mask_patch.dtype.newbyteorder('='))
             
@@ -197,10 +197,16 @@ class PlanktonDataset(Dataset):
                 mask_patch = np.pad(mask_patch, ((0, pad_height), (0, pad_width)), mode='constant', constant_values=0)
         
         if self.transform and self.train:
-            img_patch = self.transform(img_patch)
-            mask_patch = self.transform(mask_patch)
+            img_patch, mask_patch = self.transform(img_patch, mask_patch)
 
         if not self.train:
             return img_patch/255., row_start, col_start, img_idx
         
         return img_patch/255., mask_patch
+
+class TransformWithMask:
+    def __init__(self, transform):
+        self.transform = transform
+
+    def __call__(self, img, mask):
+        return self.transform(img), self.transform(mask)
