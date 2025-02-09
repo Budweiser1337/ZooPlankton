@@ -52,7 +52,7 @@ def train(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, input_size[0], 1)
-    # model.load_state_dict(torch.load("/usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/model_logs/UNet_8/best_model.pt")) 
+    model.load_state_dict(torch.load("/usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/model_logs/UNet_9/best_model.pt")) 
     model.to(device)
 
     # Build the loss
@@ -162,7 +162,7 @@ def test(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, 1, 1)
-    model.load_state_dict(torch.load("model_logs/UnetPlus_9/best_model.pt"))
+    model.load_state_dict(torch.load("model_logs/UnetPlus_2/best_model.pt"))
     model.to(device)
 
     # Inference
@@ -203,6 +203,9 @@ def test(config):
                 weight_patch = gaussian[:valid_patch_height, :valid_patch_width]
                 reconstructed_images[img_idx][row_start:row_end, col_start:col_end] += logit_patch[:valid_patch_height, :valid_patch_width] * weight_patch
                 normalization_map[img_idx][row_start:row_end, col_start:col_end] += weight_patch
+
+                # reconstructed_images[img_idx][row_start:row_end, col_start:col_end] += logit_patch[:valid_patch_height, :valid_patch_width]
+                # normalization_map[img_idx][row_start:row_end, col_start:col_end] += 1
 
     logging.info("= Generating submission file")
     for img_idx in reconstructed_images:
