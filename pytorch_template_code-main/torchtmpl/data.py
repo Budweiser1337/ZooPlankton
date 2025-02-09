@@ -10,6 +10,8 @@ import torch.nn as nn
 import torch.utils.data
 import torchvision
 from torchvision import transforms
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
 
 import PlanktonDataset
 import matplotlib.pyplot as plt
@@ -29,20 +31,21 @@ def get_dataloaders(data_config, use_cuda):
 
     logging.info("  - Dataset creation")
 
-    input_transform = transforms.Compose([
-        transforms.ToTensor(),
-        # transforms.RandomHorizontalFlip(p=0.5),
-        # transforms.RandomVerticalFlip(p=0.5),
-        # transforms.RandomRotation(45)
+    input_transform = A.Compose([
+        ToTensorV2(),
+        A.Normalize(mean=0., std=1.),
+        A.HorizontalFlip(p=0.5),
+        A.VerticalFlip(p=0.5),
+        A.Rotate(limit=45)
     ])
     base_dataset = PlanktonDataset.PlanktonDataset(
         dir=data_config["trainpath"],
         patch_size=data_config["patch_size"],
         stride=data_config["stride"],
         train=True,
-        transform=PlanktonDataset.TransformWithMask(input_transform),
+        transform=input_transform,
     )
-
+    
     logging.info(f"  - I loaded {len(base_dataset)} samples")
 
     indices = list(range(len(base_dataset)))

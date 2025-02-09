@@ -197,16 +197,20 @@ class PlanktonDataset(Dataset):
                 mask_patch = np.pad(mask_patch, ((0, pad_height), (0, pad_width)), mode='constant', constant_values=0)
         
         if self.transform and self.train:
-            img_patch, mask_patch = self.transform(img_patch, mask_patch)
+            transformed = self.transform(image=img_patch, mask=mask_patch)
+            img_patch, mask_patch = transformed["image"], transformed["mask"]
 
         if not self.train:
             return img_patch/255., row_start, col_start, img_idx
         
         return img_patch/255., mask_patch
 
-class TransformWithMask:
-    def __init__(self, transform):
+class TransformWithMask(Dataset):
+    def __init__(self, dataset, transform):
+        self.dataset = dataset
         self.transform = transform
 
-    def __call__(self, img, mask):
-        return self.transform(img), self.transform(mask)
+    def __getitem__(self, idx):
+        img, mask = self.dataset[idx]
+        transformed = self.transform(image=np.array(img), mask=np.array(mask))
+        return transformed["data"], transformed["mask"]
