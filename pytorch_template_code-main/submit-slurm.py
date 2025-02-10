@@ -43,6 +43,7 @@ source venv/bin/activate
 python3 -m pip install .
 # python3 -m pip install transformers
 python3 -m pip install segmentation_models_pytorch
+python3 -m pip install albumentations
 
 echo "Training"
 python3 torchtmpl/main.py {configpath} train
