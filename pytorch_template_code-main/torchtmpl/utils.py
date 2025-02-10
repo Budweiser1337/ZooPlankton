@@ -91,7 +91,7 @@ def train(model, loader, f_loss, optimizer, device, config, dynamic_display=True
     for i, (inputs, targets) in (pbar := tqdm.tqdm(enumerate(loader))):
 
         inputs, targets = inputs.to(device), targets.to(device)
-        
+        targets = targets.unsqueeze(1)
         with torch.autocast(device_type="cuda", dtype=torch.float16):
             # Compute the forward propagation
             outputs = model(inputs)
