@@ -142,7 +142,7 @@ def test(model, loader, f_loss, device, config):
     for (inputs, targets) in loader:
 
         inputs, targets = inputs.to(device), targets.to(device)
-
+        targets = targets.unsqueeze(1)
         # Compute the forward propagation
         outputs = model(inputs)
         # outputs = torch.sigmoid(outputs)
