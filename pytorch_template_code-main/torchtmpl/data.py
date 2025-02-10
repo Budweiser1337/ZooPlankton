@@ -32,11 +32,11 @@ def get_dataloaders(data_config, use_cuda):
     logging.info("  - Dataset creation")
 
     input_transform = A.Compose([
-        ToTensorV2(),
         A.Normalize(mean=0., std=1.),
         A.HorizontalFlip(p=0.5),
         A.VerticalFlip(p=0.5),
-        A.Rotate(limit=45)
+        A.Rotate(limit=45),
+        ToTensorV2()
     ])
     base_dataset = PlanktonDataset.PlanktonDataset(
         dir=data_config["trainpath"],
