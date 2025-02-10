@@ -191,26 +191,36 @@ class PlanktonDataset(Dataset):
         if img_height < self.patch_size or img_width < self.patch_size:
             pad_height = self.patch_size - img_height
             pad_width = self.patch_size - img_width
-            img_patch = np.pad(img_patch, ((0, pad_height), (0, pad_width)), mode='constant', constant_values=255)
+            img_patch = np.pad(img_patch, ((0, pad_height), (0, pad_width)), mode='constant', constant_values=0)
 
             if self.train:
                 mask_patch = np.pad(mask_patch, ((0, pad_height), (0, pad_width)), mode='constant', constant_values=0)
         
-        if self.transform and self.train:
-            transformed = self.transform(image=img_patch, mask=mask_patch)
-            img_patch, mask_patch = transformed["image"], transformed["mask"]
+        if self.transform:
+            if self.train:
+                transformed = self.transform(image=img_patch, mask=mask_patch)
+                img_patch, mask_patch = transformed["image"], transformed["mask"]
+            else:
+                transformed = self.transform(image=img_patch)
+                img_patch = transformed["image"]
 
         if not self.train:
-            return img_patch/255., row_start, col_start, img_idx
+            return img_patch, row_start, col_start, img_idx
         
-        return img_patch/255., mask_patch
+        return img_patch, mask_patch
 
 class TransformWithMask(Dataset):
-    def __init__(self, dataset, transform):
+    def __init__(self, dataset, transform, train):
         self.dataset = dataset
         self.transform = transform
+        self.train = train
 
     def __getitem__(self, idx):
-        img, mask = self.dataset[idx]
-        transformed = self.transform(image=np.array(img), mask=np.array(mask))
-        return transformed["data"], transformed["mask"]
+        if self.train:
+            img, mask = self.dataset[idx]
+            transformed = self.transform(image=np.array(img), mask=np.array(mask))
+            return transformed["data"], transformed["mask"]
+        else:
+            img = self.dataset[idx]
+            transformed = self.transform(image=np.array(img))
+            return transformed["image"]
