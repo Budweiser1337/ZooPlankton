@@ -3,6 +3,7 @@
 # External imports
 import torch
 import torch.nn as nn
+from lion_pytorch import Lion
 
 # Local imports
 import lossf

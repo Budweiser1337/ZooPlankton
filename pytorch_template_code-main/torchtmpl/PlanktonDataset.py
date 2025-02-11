@@ -208,19 +208,3 @@ class PlanktonDataset(Dataset):
             return img_patch, row_start, col_start, img_idx
         
         return img_patch, mask_patch
-
-class TransformWithMask(Dataset):
-    def __init__(self, dataset, transform, train):
-        self.dataset = dataset
-        self.transform = transform
-        self.train = train
-
-    def __getitem__(self, idx):
-        if self.train:
-            img, mask = self.dataset[idx]
-            transformed = self.transform(image=np.array(img), mask=np.array(mask))
-            return transformed["data"], transformed["mask"]
-        else:
-            img = self.dataset[idx]
-            transformed = self.transform(image=np.array(img))
-            return transformed["image"]
