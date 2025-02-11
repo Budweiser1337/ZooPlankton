@@ -162,7 +162,7 @@ def test(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, 1, 1)
-    model.load_state_dict(torch.load("model_logs/UnetPlus_3/best_model.pt"))
+    model.load_state_dict(torch.load("model_logs/UnetPlus_4/best_model.pt"))
     model.to(device)
 
     # Inference
@@ -171,7 +171,7 @@ def test(config):
     normalization_map = {}  # Stores patch counts for averaging
 
     patch_size = test_loader.dataset.patch_size
-    gaussian = gaussian_kernel(patch_size, sigma=64.)
+    gaussian = gaussian_kernel(patch_size, sigma=128.)
 
     with torch.no_grad():
         for batch in tqdm(test_loader):
