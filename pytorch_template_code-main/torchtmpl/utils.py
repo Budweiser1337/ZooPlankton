@@ -171,7 +171,7 @@ def get_logdir(logdir):
             return log_path
         i = i + 1
 
-def visualize_predictions(model, valid_loader, device, config, n_samples=4):
+def visualize_predictions(model, valid_loader, device, config, n_samples=8):
     model.eval()  # Switch to evaluation mode
     images, targets = next(iter(valid_loader))  # Get a batch of images and targets
     images, targets = images.to(device), targets.to(device)
