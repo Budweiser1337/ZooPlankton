@@ -92,7 +92,7 @@ def train(model, loader, f_loss, optimizer, device, config, dynamic_display=True
         "iou": 0,
     }
     num_samples = 0
-    for i, (inputs, targets) in (pbar := tqdm.tqdm(enumerate(loader), total=len(loader))):
+    for i, (inputs, targets) in (pbar := tqdm.tqdm(enumerate(loader))):
 
         inputs, targets = inputs.to(device), targets.to(device)
         targets = targets.unsqueeze(1)
@@ -150,7 +150,6 @@ def test(model, loader, f_loss, device, config):
         targets = targets.unsqueeze(1)
         # Compute the forward propagation
         outputs = model(inputs)
-        # outputs = torch.sigmoid(outputs)
         loss = f_loss(outputs, targets)
 
         # Update the metrics

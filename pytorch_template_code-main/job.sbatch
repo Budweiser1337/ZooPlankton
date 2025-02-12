@@ -21,9 +21,9 @@ date
 mkdir $TMPDIR/code
 rsync -r --exclude logs --exclude logslurms --exclude configs --include ".git/" . $TMPDIR/code
 
-echo "Checking out the correct version of the code commit_id 2588bb790555422c20a34b73cd24f86641d434a3"
+echo "Checking out the correct version of the code commit_id 74856dc79e5c03134a72f5064909015050faf3dd"
 cd $TMPDIR/code
-git checkout 2588bb790555422c20a34b73cd24f86641d434a3
+git checkout 74856dc79e5c03134a72f5064909015050faf3dd
 
 
 echo "Setting up the virtual environment"
@@ -38,7 +38,7 @@ python3 -m pip install albumentations
 python3 -m pip install lion_pytorch
 
 echo "Training"
-python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmp66gnq8zp-config.yml train
+python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmpmmxzkyja-config.yml train
 
 if [[ $? != 0 ]]; then
     exit -1

@@ -191,12 +191,12 @@ def test(config):
                 valid_patch_width = col_end - col_start
 
                 # Accumulate logits and count overlapping contributions
-                # weight_patch = gaussian[:valid_patch_height, :valid_patch_width]
-                # reconstructed_images[img_idx][row_start:row_end, col_start:col_end] += logit_patch[:valid_patch_height, :valid_patch_width] * weight_patch
-                # normalization_map[img_idx][row_start:row_end, col_start:col_end] += weight_patch
+                weight_patch = gaussian[:valid_patch_height, :valid_patch_width]
+                reconstructed_images[img_idx][row_start:row_end, col_start:col_end] += logit_patch[:valid_patch_height, :valid_patch_width] * weight_patch
+                normalization_map[img_idx][row_start:row_end, col_start:col_end] += weight_patch
 
-                reconstructed_images[img_idx][row_start:row_end, col_start:col_end] += logit_patch[:valid_patch_height, :valid_patch_width]
-                normalization_map[img_idx][row_start:row_end, col_start:col_end] += 1
+                # reconstructed_images[img_idx][row_start:row_end, col_start:col_end] += logit_patch[:valid_patch_height, :valid_patch_width]
+                # normalization_map[img_idx][row_start:row_end, col_start:col_end] += 1
 
     logging.info("= Generating submission file")
     for img_idx in reconstructed_images:
