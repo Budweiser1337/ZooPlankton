@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --exclude=sh00,sh[10-19]
 #SBATCH --partition=gpu_prod_long
-#SBATCH --time=36:00:00
+#SBATCH --time=40:00:00
 #SBATCH --output=logslurms/slurm-%A_%a.out
 #SBATCH --error=logslurms/slurm-%A_%a.err
 #SBATCH --array=1-1
@@ -21,9 +21,9 @@ date
 mkdir $TMPDIR/code
 rsync -r --exclude logs --exclude logslurms --exclude configs --include ".git/" . $TMPDIR/code
 
-echo "Checking out the correct version of the code commit_id 74856dc79e5c03134a72f5064909015050faf3dd"
+echo "Checking out the correct version of the code commit_id ed4cfdf1c9f1851a6d5b035aee3890f08a34457f"
 cd $TMPDIR/code
-git checkout 74856dc79e5c03134a72f5064909015050faf3dd
+git checkout ed4cfdf1c9f1851a6d5b035aee3890f08a34457f
 
 
 echo "Setting up the virtual environment"
@@ -38,7 +38,7 @@ python3 -m pip install albumentations
 python3 -m pip install lion_pytorch
 
 echo "Training"
-python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmpmmxzkyja-config.yml train
+python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/pytorch_template_code-main/configs/tmpi84yojeu-config.yml train
 
 if [[ $? != 0 ]]; then
     exit -1
