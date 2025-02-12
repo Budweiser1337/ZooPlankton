@@ -9,6 +9,8 @@ import torch.nn
 import tqdm
 import metrics
 import matplotlib.pyplot as plt
+import numpy as np
+import wandb
 
 def generate_unique_logpath(logdir, raw_run_name):
     """
@@ -80,30 +82,32 @@ def train(model, loader, f_loss, optimizer, device, config, dynamic_display=True
     # We enter train mode.
     # This is important for layers such as dropout, batchnorm, ...
     model.train()
-    scaler = torch.GradScaler(init_scale=256)
+    scaler = torch.GradScaler()
+    accumulation_steps = 4
     total_loss = 0
     total_metrics = {
         "precision": 0,
         "recall": 0,
         "f1": 0,
+        "iou": 0,
     }
     num_samples = 0
-    for i, (inputs, targets) in (pbar := tqdm.tqdm(enumerate(loader))):
+    for i, (inputs, targets) in (pbar := tqdm.tqdm(enumerate(loader), total=len(loader))):
 
         inputs, targets = inputs.to(device), targets.to(device)
         targets = targets.unsqueeze(1)
         with torch.autocast(device_type="cuda", dtype=torch.float16):
             # Compute the forward propagation
             outputs = model(inputs)
-            #outputs = torch.sigmoid(outputs['out'])
-            loss = f_loss(outputs, targets)
+            loss = f_loss(outputs, targets) / accumulation_steps
 
         # Backward and optimize
-        optimizer.zero_grad(set_to_none=True)
         scaler.scale(loss).backward()
-        scaler.step(optimizer)
-        scaler.update()
-
+        if (i + 1) % accumulation_steps == 0 or (i + 1) == len(loader):
+            scaler.step(optimizer)
+            scaler.update()
+            optimizer.zero_grad(set_to_none=True)
+            
         # Update the metrics
         # We here consider the loss is batch normalized
         train_metrics = metrics.compute_metrics(y_true=targets, y_pred=(torch.sigmoid(outputs) > config['model']['threshold']).int())
@@ -138,6 +142,7 @@ def test(model, loader, f_loss, device, config):
         "precision": 0,
         "recall": 0,
         "f1": 0,
+        "iou": 0,
     }
     for (inputs, targets) in loader:
 
@@ -166,3 +171,47 @@ def get_logdir(logdir):
         if not os.path.isdir(log_path):
             return log_path
         i = i + 1
+
+def visualize_predictions(model, valid_loader, device, config, n_samples=4):
+    model.eval()  # Switch to evaluation mode
+    images, targets = next(iter(valid_loader))  # Get a batch of images and targets
+    images, targets = images.to(device), targets.to(device)
+
+    # Get model predictions
+    with torch.no_grad():
+        predictions = model(images)
+        predictions = torch.sigmoid(predictions) >= config["model"]["threshold"]
+    
+    # Select a few samples to visualize
+    samples = min(n_samples, images.size(0))
+    fig, axes = plt.subplots(samples, 3, figsize=(12, 4*samples))
+
+    for i in range(samples):
+        # Original image
+        axes[i, 0].imshow(images[i].cpu().permute(1, 2, 0).numpy())
+        axes[i, 0].set_title("Input Image")
+        axes[i, 0].axis('off')
+        
+        # Ground truth (if segmentation or similar task)
+        axes[i, 1].imshow(targets[i].cpu().numpy(), cmap='gray')
+        axes[i, 1].set_title("Ground Truth")
+        axes[i, 1].axis('off')
+        
+        # Prediction (same format as ground truth)
+        axes[i, 2].imshow(predictions[i].cpu().numpy(), cmap='gray')
+        axes[i, 2].set_title("Prediction")
+        axes[i, 2].axis('off')
+
+    # Log to wandb
+    wandb.log({
+        "predictions": [wandb.Image(fig)]
+    })
+    plt.close(fig)
+
+def gaussian_kernel(size, sigma):
+    """Generate a 2D Gaussian kernel for soft blending"""
+    kernel = np.fromfunction(
+        lambda x, y: (1 / (2 * np.pi * sigma ** 2)) * np.exp(- ((x - size // 2) ** 2 + (y - size // 2) ** 2) / (2 * sigma ** 2)),
+        (size, size)
+    )
+    return kernel / np.sum(kernel)

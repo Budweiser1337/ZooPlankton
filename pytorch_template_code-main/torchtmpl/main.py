@@ -131,14 +131,7 @@ def train(config):
         if wandb_log is not None:
             logging.info("Logging on wandb")
             wandb_log(metrics)
-
-def gaussian_kernel(size, sigma):
-    """Generate a 2D Gaussian kernel for soft blending"""
-    kernel = np.fromfunction(
-        lambda x, y: (1 / (2 * np.pi * sigma ** 2)) * np.exp(- ((x - size // 2) ** 2 + (y - size // 2) ** 2) / (2 * sigma ** 2)),
-        (size, size)
-    )
-    return kernel / np.sum(kernel)
+            utils.visualize_predictions(model, valid_loader, device, config, n_samples=4)
 
 def test(config):
     use_cuda = torch.cuda.is_available()
@@ -169,7 +162,7 @@ def test(config):
     normalization_map = {}  # Stores patch counts for averaging
 
     patch_size = test_loader.dataset.patch_size
-    gaussian = gaussian_kernel(patch_size, sigma=128.)
+    gaussian = utils.gaussian_kernel(patch_size, sigma=128.)
 
     with torch.no_grad():
         for batch in tqdm(test_loader):
