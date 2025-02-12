@@ -192,12 +192,12 @@ def visualize_predictions(model, valid_loader, device, config, n_samples=4):
         axes[i, 0].axis('off')
         
         # Ground truth (if segmentation or similar task)
-        axes[i, 1].imshow(targets[i].cpu().numpy(), cmap='gray')
+        axes[i, 1].imshow(targets[i].cpu().numpy().squeeze(), cmap='gray')
         axes[i, 1].set_title("Ground Truth")
         axes[i, 1].axis('off')
         
         # Prediction (same format as ground truth)
-        axes[i, 2].imshow(predictions[i].cpu().numpy(), cmap='gray')
+        axes[i, 2].imshow(predictions[i].cpu().numpy().squeeze(), cmap='gray')
         axes[i, 2].set_title("Prediction")
         axes[i, 2].axis('off')
 
