@@ -45,6 +45,7 @@ python3 -m pip install .
 python3 -m pip install segmentation_models_pytorch
 python3 -m pip install albumentations
 python3 -m pip install lion_pytorch
+python3 -m pip install monai
 
 echo "Training"
 python3 torchtmpl/main.py {configpath} train
