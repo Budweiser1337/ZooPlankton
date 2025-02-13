@@ -4,6 +4,7 @@
 import torch
 import torchvision.models.segmentation as torchmodels
 import segmentation_models_pytorch as smp
+from monai.networks.nets import SwinUNETR
 
 # Local imports
 from .base_models import *
@@ -48,6 +49,15 @@ def build_model(cfg, input_size, num_classes):
             classes=1,
             activation=None,  # Use raw logits (for BCE/Focal/Dice loss)
             decoder_attention_type="scse"
+        )
+        return model
+    
+    elif cfg['class'] == "SwinUNETR":
+        model = SwinUNETR(
+            img_size=(input_size, input_size),
+            in_channels=1,
+            out_channels=1,
+            feature_size=48  # Controls model complexity
         )
         return model
     
