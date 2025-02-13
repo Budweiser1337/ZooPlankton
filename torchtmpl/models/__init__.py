@@ -54,9 +54,11 @@ def build_model(cfg, input_size, num_classes):
     
     elif cfg['class'] == "SwinUNETR":
         model = SwinUNETR(
+            img_size=(input_size, input_size)
             in_channels=1,
             out_channels=1,
-            feature_size=48  # Controls model complexity
+            feature_size=48,  # Controls model complexity
+            spatial_dims=2
         )
         return model
     
