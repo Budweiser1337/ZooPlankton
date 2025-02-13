@@ -35,6 +35,9 @@ config.yaml
 # Models
 model_logs
 
+# Configs
+configs
+
 # Vim
 **/*.swp
 **/tags
