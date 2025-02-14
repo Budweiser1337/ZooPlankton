@@ -21,9 +21,9 @@ date
 mkdir $TMPDIR/code
 rsync -r --exclude logs --exclude logslurms --exclude configs --include ".git/" . $TMPDIR/code
 
-echo "Checking out the correct version of the code commit_id e140e4b8bdc0991fad74703f2366fa73a4ca7cf4"
+echo "Checking out the correct version of the code commit_id 3348e1ab4d7f340ca0481a43e7074378839874f0"
 cd $TMPDIR/code
-git checkout e140e4b8bdc0991fad74703f2366fa73a4ca7cf4
+git checkout 3348e1ab4d7f340ca0481a43e7074378839874f0
 
 
 echo "Setting up the virtual environment"
@@ -37,7 +37,7 @@ python3 -m pip install lion_pytorch
 python3 -m pip install monai einops
 
 echo "Training"
-python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/configs/tmppy8ucn25-config.yml train
+python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/configs/tmpehbj9xfg-config.yml train
 
 if [[ $? != 0 ]]; then
     exit -1
