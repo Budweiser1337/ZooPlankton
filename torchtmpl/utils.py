@@ -171,9 +171,18 @@ def get_logdir(logdir):
             return log_path
         i = i + 1
 
-def visualize_predictions(model, valid_loader, device, config, n_samples=4):
+def visualize_predictions(model, valid_loader, device, config, valid_iter=None, n_samples=4):
     model.eval()  # Switch to evaluation mode
-    images, targets = next(iter(valid_loader))  # Get a batch of images and targets
+    
+    if valid_iter is None:
+        valid_iter = iter(valid_loader)
+    
+    try:
+        images, targets = next(valid_iter)  # Get next batch
+    except StopIteration:  
+        valid_iter = iter(valid_loader)  # Reset if exhausted
+        images, targets = next(valid_iter) 
+        
     images, targets = images.to(device), targets.to(device)
 
     # Get model predictions
@@ -206,6 +215,8 @@ def visualize_predictions(model, valid_loader, device, config, n_samples=4):
         "predictions": [wandb.Image(fig)]
     })
     plt.close(fig)
+    
+    return valid_iter
 
 def gaussian_kernel(size, sigma):
     """Generate a 2D Gaussian kernel for soft blending"""

@@ -106,6 +106,7 @@ def train(config):
         model, str(logdir / "best_model.pt"), min_is_best=False
     )
 
+    valid_iter = None
     for e in range(config["nepochs"]):
         # Train 1 epoch
         train_loss, train_metrics = utils.train(model, train_loader, loss, optimizer, device, config)
@@ -131,7 +132,7 @@ def train(config):
         if wandb_log is not None:
             logging.info("Logging on wandb")
             wandb_log(metrics)
-            utils.visualize_predictions(model, valid_loader, device, config, n_samples=4)
+            valid_iter = utils.visualize_predictions(model, valid_loader, device, config, valid_iter=valid_iter, n_samples=4)
 
 def test(config):
     use_cuda = torch.cuda.is_available()
