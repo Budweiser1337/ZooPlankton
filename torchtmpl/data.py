@@ -36,11 +36,6 @@ def get_dataloaders(data_config, use_cuda):
         A.HorizontalFlip(p=0.5),
         A.VerticalFlip(p=0.5),
         A.Rotate(limit=45),
-        A.ElasticTransform(alpha=1, sigma=50, alpha_affine=50, p=0.5),
-        A.GridDistortion(p=0.5),
-        A.GaussianBlur(p=0.2),
-        A.RandomBrightnessContrast(p=0.3),
-        A.CLAHE(p=0.2),
         ToTensorV2()
     ])
     base_dataset = PlanktonDataset.PlanktonDataset(
