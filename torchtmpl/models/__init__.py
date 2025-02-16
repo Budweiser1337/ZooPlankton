@@ -33,7 +33,7 @@ def build_model(cfg, input_size, num_classes):
     elif cfg['class'] == "Segformer":
         # Load SegFormer model for semantic segmentation
         model = smp.Segformer(
-            encoder_name="resnet152",
+            encoder_name="timm-efficientnet-b3",
             encoder_weights="imagenet",
             classes=1,
             activation=None, # Use raw logits (for BCE/Focal/Dice loss)
