@@ -202,9 +202,9 @@ def visualize_predictions(model, valid_loader, device, config, valid_iter=None, 
         img = images[i]
         if images.shape[0] == 1:  # Grayscale image
             img = img.squeeze(0)  # Remove channel dimension
-            axes[i, 0].imshow(img.numpy(), cmap='gray')
+            axes[i, 0].imshow(img.cpu().numpy(), cmap='gray')
         else:
-            axes[i, 0].imshow(img.permute(1, 2, 0).numpy())
+            axes[i, 0].imshow(img.cpu().permute(1, 2, 0).numpy())
         axes[i, 0].set_title("Input Image")
         axes[i, 0].axis('off')
         
