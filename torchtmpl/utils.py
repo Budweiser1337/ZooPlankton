@@ -193,6 +193,9 @@ def visualize_predictions(model, valid_loader, device, config, valid_iter=None, 
     # Select a few samples to visualize
     samples = min(n_samples, images.size(0))
     fig, axes = plt.subplots(samples, 3, figsize=(12, 4*samples))
+    
+    if samples == 1:  # Handle batch_size=1 case
+        axes = np.expand_dims(axes, axis=0)
 
     for i in range(samples):
         # Original image
