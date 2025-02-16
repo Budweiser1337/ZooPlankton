@@ -64,11 +64,11 @@ def build_model(cfg, input_size, num_classes):
     
     elif cfg['class'] == "DeepLabV3Plus":
         model = smp.DeepLabV3Plus(
-            encoder_name="timm-efficientnet-b3",        # Choose ResNet50 as the encoder
-            encoder_weights="imagenet",     # Use pretrained weights on ImageNet
-            in_channels=1,                  # Input channels (RGB images)
-            classes=1,                       # Binary segmentation (1 output channel)
-            activation=None            # Use sigmoid for binary classification
+            encoder_name="timm-efficientnet-b3",
+            encoder_weights="imagenet",
+            in_channels=1,
+            classes=1,
+            activation=None
         )
         return model
     
