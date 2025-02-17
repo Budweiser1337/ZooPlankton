@@ -83,7 +83,7 @@ def train(model, loader, f_loss, optimizer, device, config, dynamic_display=True
     # This is important for layers such as dropout, batchnorm, ...
     model.train()
     scaler = torch.GradScaler()
-    accumulation_steps = 4
+    accumulation_steps = 2
     total_loss = 0
     total_metrics = {
         "precision": 0,
