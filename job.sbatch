@@ -1,9 +1,10 @@
 #!/bin/bash
 
-#SBATCH --job-name=prediction
+#SBATCH --job-name=training
 #SBATCH --nodes=1
+#SBATCH --exclude=sh00,sh[10-19]
 #SBATCH --partition=gpu_prod_long
-#SBATCH --time=6:00:00
+#SBATCH --time=40:00:00
 #SBATCH --output=logslurms/slurm-%A_%a.out
 #SBATCH --error=logslurms/slurm-%A_%a.err
 #SBATCH --array=1-1
@@ -20,9 +21,9 @@ date
 mkdir $TMPDIR/code
 rsync -r --exclude logs --exclude logslurms --exclude configs --include ".git/" . $TMPDIR/code
 
-echo "Checking out the correct version of the code commit_id d24a4cb4d881ea3bdbe0d7234283adc626f071b2"
+echo "Checking out the correct version of the code commit_id 2275ede82976781c99e6a59cc630aeb0100a46b2"
 cd $TMPDIR/code
-git checkout d24a4cb4d881ea3bdbe0d7234283adc626f071b2
+git checkout 2275ede82976781c99e6a59cc630aeb0100a46b2
 
 
 echo "Setting up the virtual environment"
@@ -35,8 +36,8 @@ python3 -m pip install segmentation_models_pytorch albumentations
 python3 -m pip install lion_pytorch
 python3 -m pip install monai einops
 
-echo "Prediction"
-python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/configs/tmp1i052_rt-config.yml test
+echo "Training"
+python3 torchtmpl/main.py /usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/configs/tmpdb_psehy-config.yml train
 
 if [[ $? != 0 ]]; then
     exit -1
