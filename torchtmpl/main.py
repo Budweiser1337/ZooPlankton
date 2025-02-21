@@ -63,7 +63,16 @@ def train(config):
     logging.info("= Optimizer")
     optim_config = config["optim"]
     optimizer = optim.get_optimizer(optim_config, model.parameters())
-
+    
+    logging.info("= Scheduler")
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, 
+        mode='max',
+        factor=0.1,
+        patience=3,
+        verbose=True
+    )
+    
     # Build the callbacks
     logging_config = config["logging"]
     # Let us use as base logname the class name of the modek
@@ -124,6 +133,7 @@ def train(config):
                 "[>> BETTER <<]" if updated else "",
             )
         )
+        scheduler.step(test_metrics["f1"])
 
         # Update the dashboard
         metrics = {"train_CE": train_loss, "test_CE": test_loss,

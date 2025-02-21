@@ -31,19 +31,29 @@ def get_dataloaders(data_config, use_cuda):
 
     logging.info("  - Dataset creation")
 
-    input_transform = A.Compose([
+    train_transform = A.Compose([
         A.Normalize(mean=[0.], std=[1.]),
         A.HorizontalFlip(p=0.5),
         A.VerticalFlip(p=0.5),
         A.Rotate(limit=45),
+        A.RandomBrightnessContrast(p=0.5),
+        A.GaussianBlur(p=0.2),
+        A.RandomGamma(p=0.3),
+        A.CLAHE(clip_limit=2., p=0.3),
         ToTensorV2()
     ])
+    
+    valid_transform = A.Compose([
+        A.Normalize(mean=[0.], std=[1.]),
+        ToTensorV2()
+    ])
+    
     base_dataset = PlanktonDataset.PlanktonDataset(
         dir=data_config["trainpath"],
         patch_size=data_config["patch_size"],
         stride=data_config["stride"],
         train=True,
-        transform=input_transform,
+        transform=None,
     )
     
     logging.info(f"  - I loaded {len(base_dataset)} samples")
@@ -56,6 +66,9 @@ def get_dataloaders(data_config, use_cuda):
 
     train_dataset = torch.utils.data.Subset(base_dataset, train_indices)
     valid_dataset = torch.utils.data.Subset(base_dataset, valid_indices)
+    
+    train_dataset.dataset.transform = train_transform
+    valid_dataset.dataset.transform = valid_transform
 
     # Build the dataloaders
     train_loader = torch.utils.data.DataLoader(

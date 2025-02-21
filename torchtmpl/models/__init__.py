@@ -43,7 +43,7 @@ def build_model(cfg, input_size, num_classes):
     
     elif cfg['class'] == 'UnetPlus':
         model = smp.UnetPlusPlus(
-            encoder_name="timm-efficientnet-b5",
+            encoder_name="timm-efficientnet-b4",
             encoder_weights="advprop",
             in_channels=1,
             classes=1,
