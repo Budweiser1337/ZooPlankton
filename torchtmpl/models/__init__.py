@@ -43,8 +43,8 @@ def build_model(cfg, input_size, num_classes):
     
     elif cfg['class'] == 'UnetPlus':
         model = smp.UnetPlusPlus(
-            encoder_name="timm-efficientnet-b4",
-            encoder_weights="imagenet",
+            encoder_name="timm-efficientnet-b5",
+            encoder_weights="advprop",
             in_channels=1,
             classes=1,
             activation=None,  # Use raw logits (for BCE/Focal/Dice loss)
@@ -65,6 +65,16 @@ def build_model(cfg, input_size, num_classes):
     elif cfg['class'] == "DeepLabV3Plus":
         model = smp.DeepLabV3Plus(
             encoder_name="timm-efficientnet-b3",
+            encoder_weights="imagenet",
+            in_channels=1,
+            classes=1,
+            activation=None
+        )
+        return 
+    
+    elif cfg['class'] == "MAnet":
+        model = smp.MAnet(
+            encoder_name="timm-efficientnet-b4",
             encoder_weights="imagenet",
             in_channels=1,
             classes=1,
