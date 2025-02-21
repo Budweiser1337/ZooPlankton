@@ -44,7 +44,7 @@ def build_model(cfg, input_size, num_classes):
     elif cfg['class'] == 'UnetPlus':
         model = smp.UnetPlusPlus(
             encoder_name="timm-efficientnet-b4",
-            encoder_weights="advprop",
+            encoder_weights="imagenet",
             in_channels=1,
             classes=1,
             activation=None,  # Use raw logits (for BCE/Focal/Dice loss)
