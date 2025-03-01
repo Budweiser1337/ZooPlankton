@@ -1,15 +1,15 @@
-# Template base code for pytorch
+## Overview
+The objective of this project is to segment living organisms from non living stuff. The stuff can be non living body parts, debris etc...
 
-This repository contains a template base code for a complete pytorch pipeline.
+The segmentation is to be performed on scanned images from the ZooPlankton device. The images have been collected at Villefranche-sur-mer and provided by
 
-This is a template because it works on fake data but aims to illustrate some pythonic syntax allowing the pipeline to be modular.
+Sorbonne Université/CNRS - Institut de la Mer de Villefranche (IMEV), Sorbonne Université/CNRS - Laboratoire d'Océanographie de Villefranche (LOV); 2020; Plankton community in Régent (680µm) net, Point B, Villefranche-sur-Mer, France https://dx.doi.org/10.14284/477
 
-More specifically, this template base code aims to target :
+The data have been collected with a Régent (680µm) net and contains organisms whose size ranges from ~700µm up to ~5cm. These organisms belong to mesozooplankton. With these observations, the researchers seek to better understand the dynamics of these communities.
 
-- modularity : allowing to change models/optimizers/ .. and their hyperparameters easily
-- reproducibility : saving the commit id, ensuring every run saves its assets in a different directory, recording a summary card for every experiment, building a virtual environnement
+The scanners has a high throughput rendering difficult the labeling by humans. Hence, the researchers are interested in automating the process of labeling the scans. The tasks we will focus on in this challenge is the task of segmenting living from non-living, with the objective to isolate living organisms for possibly later classification of the segmented individuals.
 
-For the last point, if you ever got a good model as an orphane pytorch tensor whithout being able to remember in which conditions, with which parameters and so on you got, you see what I mean. 
+This project was made to compete in a private kaggle competition, which was part of a deep learning class at CentraleSupélec.
 
 ## Usage
 
@@ -26,16 +26,16 @@ python -m pip install .
 Then you can run a training, by editing the yaml file, then 
 
 ```
-python -m torchtmpl.main config.yml train
+python -m torchtmpl/main.py config.yml train
 ```
 
 And for testing (**not yet implemented**)
 
 ```
-python main.py path/to/your/run test
+python torchtmpl/main.py config.yaml test
 ```
 
-### Cluster experimentation (**not yet implemented**)
+### Cluster experimentation
 
 For running the code on a cluster, we provide an example script for starting an experimentation on a SLURM based cluster.
 
@@ -44,7 +44,7 @@ The script we provide is dedicated to a use on our clusters and you may need to 
 Then running the simulation can be as simple as :
 
 ```
-python3 submit.py
+python3 submit-slurm.py config.yaml
 ```
 
 ## Testing the functions
